@@ -33,7 +33,7 @@ from millify import millify
 import random
 print("quickskits booting up...")
 
-serverurl = "http://freshcraft.play.ai:5001/"
+serverurl = "https://quickskits.app/"
 
 
 def verifyemail(email, username, link):
