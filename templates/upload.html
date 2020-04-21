@@ -1,0 +1,99 @@
+<html>
+
+<head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <style>
+        html,
+        body {
+            position: relative;
+            height: 100%;
+            background-color: black;
+            color: white;
+        }
+
+        body {
+            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swiper-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            text-align: center;
+            font-size: 18px;
+
+            /* Center slide text vertically */
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+        }
+    </style>
+    <script>
+        const updatemessages = async () => {
+            const response = await fetch("/checklogin")
+            const text = await response.text()
+
+            if (text != "true") {
+                location.replace("/login")
+            }
+        }
+        updatemessages()
+        setInterval(updatemessages, 5000);
+    </script>
+</head>
+
+<body>
+    <div
+        style="position: -webkit-sticky; position: sticky; top: 0; background-color: white; color: black; padding: 1rem; padding-left: 1rem; border-bottom-right-radius: 100%; width: 75%;">
+        <h1>Upload</h1>
+    </div>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="video" accept="video/mp4" required multiple><br>
+        <input type="text" name="title" placeholder="Title" required><br>
+        <input type="text" name="description" placeholder="description" required><br>
+        <input type="checkbox" id="tickbox" name="portat" value="portat">
+        <label for="tickbox">this video is a portat video</label><br>
+        <h2>music:</h2>
+        <select name="music">
+            <option value="n">None</option>
+            <option value="puk">pumped up kicks</option>
+            <option value="puke">pumped up kicks (Bass Boost)</option>
+            <option value="db">death bed</option>
+            <option value="gd">Good Day</option>
+        </select><br><br>
+        <h2>audio mixer</h2>
+        video audio <input name="mixer" type="range" min="0" max="100" value="95"> music<br><br>
+        <input type="submit">
+    </form>
+    <script>
+        $('input[type="checkbox"]').on('change', function () {
+            $('input[name="' + this.name + '"]').not(this).prop('checked', false);
+        });
+    </script>
+</body>
+
+</html>

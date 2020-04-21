@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    .like {
+        color: red;
+    }
+
+    .default {
+        color: gray;
+        opacity: 0.3;
+    }
+</style>
+<script>
+    function like() {
+        var element = document.getElementById("likebutton");
+        element.classList.toggle("like");
+        element.classList.toggle("default");
+    }</script>
+<button class="fa fa-heart default" id="likebutton"
+    style="background-color: transparent; outline: none; transition: color 0.25s ease-in-out, opacity 0.25s ease-in-out;  border: none; font-size: 50px; text-align: right;"
+    onclick="like()"></button>

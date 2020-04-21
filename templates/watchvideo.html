@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="apple-touch-startup-image" href="/favicon/favicon-32x32.png">
+    <meta name="apple-mobile-web-app-title" content="QuickSkits">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title id="htmltitle">loading...</title>
+    <style>
+        .like {
+            color: rgb(255, 70, 70);
+        }
+
+        .default {
+            color: gray;
+            opacity: 0.7;
+        }
+    </style>
+    <style>
+        /* Center the loader */
+        #loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 1;
+            width: 150px;
+            height: 150px;
+            margin: -75px 0 0 -75px;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Add animation to "page content" */
+        .animate-bottom {
+            position: relative;
+            -webkit-animation-name: animatebottom;
+            -webkit-animation-duration: 1s;
+            animation-name: animatebottom;
+            animation-duration: 1s
+        }
+
+        @-webkit-keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0
+            }
+
+            to {
+                bottom: 0px;
+                opacity: 1
+            }
+        }
+
+        @keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0
+            }
+
+            to {
+                bottom: 0;
+                opacity: 1
+            }
+        }
+
+        #myDiv {
+            display: none;
+            text-align: center;
+        }
+    </style>
+
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial;
+            font-size: 17px;
+            background-color: black;
+        }
+
+        a {
+            color: hsla(0, 0%, 95%, 0.26);
+            text-align: center;
+        }
+
+        .content {
+            position: fixed;
+            word-wrap: break-word;
+            background: rgba(0, 0, 0, 0);
+            color: hsla(0, 0%, 95%, 0.26);
+            width: 100%;
+            padding: 1px;
+            transition: 1s;
+        }
+
+        .pausea {
+            color: #f1f1f1;
+        }
+
+        .pause {
+            background: rgba(0, 0, 0, 0.322);
+            color: #f1f1f1;
+        }
+
+        #myBtn {
+            width: 200px;
+            font-size: 18px;
+            padding: 10px;
+            border: none;
+            background: #000;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #myBtn:hover {
+            background: #ddd;
+            color: black;
+        }
+
+        .pauseicon {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .hide {
+            display: none;
+            transition: 1s;
+        }
+
+        .fullstretch {
+            object-fit: cover;
+        }
+    </style>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/jquery.touchSwipe.js"></script>
+    <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/demos/js/main.js"></script>
+    <script>
+        let videojson = {}
+        const getlatest = async (number) => {
+            $("#loading").removeClass("hide")
+            const vid = document.getElementById("myVideo");
+            vid.pause();
+            const title = document.getElementById("title");
+            const htmltitle = document.getElementById("htmltitle");
+            const description = document.getElementById("description");
+            const username = document.getElementById("username")
+            const likenumber = document.getElementById("likenumber")
+            const viewnumber = document.getElementById("viewnumber")
+            htmltitle.innerHTML = "loading...";
+            username.innerHTML = "";
+            title.innerHTML = "";
+            likenumber.innerHTML = "";
+            viewnumber.interHTML = "";
+            description.innerHTML = "";
+            $("#myVideo").slideUp(0);
+            const response = await fetch("/getjson/video/" + number)
+            const jsonified = await response.json()
+            videojson = jsonified
+            vid.src = jsonified.src;
+            if (jsonified.stretch == 1) {
+                if ($(window).width() < $(window).height()) {
+                    $("#myVideo").addClass("fullstretch")
+                } else {
+                    $("#myVideo").removeClass("fullstretch")
+                }
+            } else {
+                if ($(window).width() < $(window).height()) {
+                    $("#myVideo").removeClass("fullstretch")
+                } else {
+                    $("#myVideo").addClass("fullstretch")
+                }
+
+            }
+            try {
+                const response = fetch("/view/" + videojson.videoid)
+                vid.load();
+                vid.addEventListener('loadeddata', function () {
+                    $("#myVideo").slideDown();
+                    htmltitle.innerHTML = jsonified.title + " - " + jsonified.username;
+                    title.innerHTML = jsonified.title;
+                    getlikevariable()
+                    if (jsonified.likes == 1) {
+                        likenumber.innerHTML = jsonified.likes + " like";
+                    } else {
+                        likenumber.innerHTML = jsonified.likes + " likes";
+                    }
+                    if (videojson.views == 1) {
+                        viewnumber.innerHTML = videojson.views + " view";
+                    } else {
+                        viewnumber.innerHTML = videojson.views + " views";
+                    }
+
+                    username.innerHTML = "@" + jsonified.username;
+                    $("#useratag").attr("href", "/user?user=" + videojson.username.replace(" ", "-"));
+                    description.innerHTML = jsonified.description;
+                    if (jsonified.videoliked == "true") {
+                        like()
+                    } else {
+                        unlike()
+                    }
+                    $("#loading").addClass("hide")
+                    vid.play();
+                    $(".pauseicon").addClass("hide");
+                    $(".content").removeClass("pause")
+                }, false);
+            }
+            catch (err) {
+                title.innerHTML = "Error in opening video";
+                description.innerHTML = err.message;
+                $("#loading").addClass("hide")
+                $(".pauseicon").addClass("hide");
+                $(".content").removeClass("pause")
+                unlike()
+            }
+
+
+        }
+        function getvideojson() {
+            return videojson
+        }
+    </script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/jquery.touchSwipe.js"></script>
+    <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/demos/js/main.js"></script>
+    <script>
+        likes = 0
+        function getlikevariable() { likes = parseInt(getvideojson().likes) }
+        const likeunlike = async () => {
+            var element = document.getElementById("likebutton");
+            if ($("#likebutton").hasClass("like") == false) {
+                $("#likebutton").addClass("like");
+                $("#likebutton").removeClass("default");
+                likes += 1
+                if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
+                const response = await fetch("/likebutton/like/" + getvideojson().videoid)
+                const jsonified = await response.text()
+                if (jsonified != "true") {
+                    $("#likebutton").removeClass("like");
+                    $("#likebutton").addClass("default");
+                    likes = getvideojson().likes
+                    if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
+                }
+            } else {
+                $("#likebutton").removeClass("like");
+                $("#likebutton").addClass("default");
+                likes -= 1
+                if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
+                const response = await fetch("/likebutton/unlike/" + getvideojson().videoid)
+                const jsonified = await response.text()
+                if (jsonified != "true") {
+                    $("#likebutton").addClass("like");
+                    $("#likebutton").removeClass("default");
+                    likes = getvideojson().likes
+                    if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
+                }
+            }
+        }
+        const getlikes = async () => {
+            const response = await fetch("/likebutton/getlikes/" + getvideojson().videoid)
+            const jsonified = await response.json()
+            if (jsonified.likes != likes) {
+                if (jsonified.likes != undefined) {
+                    likes = jsonified.likes
+                    if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
+                }
+            }
+        }
+        function like() {
+            $("#likebutton").addClass("like");
+            $("#likebutton").removeClass("default");
+        }
+        function unlike() {
+            $("#likebutton").removeClass("like");
+            $("#likebutton").addClass("default");
+        }
+
+        const dblike = async () => {
+            $("#likemiddle").fadeIn(200).delay(500).fadeOut(500)
+            if (videojson.videoliked != "true") {
+                like()
+                videojson.videoliked = "true"
+                videojson.likes += 1
+                likes = videojson.likes
+                if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
+                const response = await fetch("/likebutton/like/" + videojson.videoid)
+                const jsonified = await response.text()
+                if (jsonified != "true") {
+                    unlike()
+                    videojson.videoliked = "false"
+                    videojson.likes -= 1
+                }
+            }
+        }
+    </script>
+    <script>
+        const updatemessages = async () => {
+            getlikes()
+            const response = await fetch("/checklogin")
+            const text = await response.text()
+
+            if (text != "true") {
+                location.replace("/login")
+            }
+        }
+        updatemessages()
+        setInterval(updatemessages, 5000);
+    </script>
+</head>
+
+<body id="body" onload="getlatest('{{videoid}}')">
+
+    <video width=100% height=100% id="myVideo" onclick="pauseAndPlay()" ondblclick="dblike()"
+        style="position: fixed; right: 0; bottom: 0; border-top-left-radius: 10px; border-top-right-radius: 10px;"
+        src="" type="video/mp4" autoplay loop playsinline>
+    </video>
+    <div class="pauseicon hide" onclick="pauseAndPlay()" ondblclick="dblike()">
+        <img height=49px src="/serverimagedata/pause.png">
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <div id='back5' style="position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    color: white;
+    display: none;">
+        <h1>-5 sec</h1>
+    </div>
+    <div id='likemiddle'
+        style="position: fixed;
+top: 48%;
+left: 48%;
+transform: translate(-50%, -50%);
+background-color: transparent; outline: none;  border: none; font-size: 100px; text-align: right; display: none; color: white;"
+        class="fa fa-heart">
+    </div>
+    <div class="content" style="bottom: 0;">
+        <div onclick="pauseAndPlay()" ondblclick="dblike()">
+            <a href="" id="useratag" style="text-decoration: none;">
+                <h3 style="text-align: center; width: 100%; text-decoration: none; opacity: 0.7;" id="username"></h3>
+            </a>
+            <h1 id="title" style="text-align: center; width: 100%;"></h1>
+            <p id="description" style="text-align: center; width: 100%;"></p>
+            <div style="background-color: rgba(255, 255, 255, 0.2); height: 1px;"></div>
+        </div>
+        <div style="display: flex; flex-wrap: nowrap; justify-content: space-around;">
+            <a onClick="reverse()"><img height=49px src="/serverimagedata/reverse.png" style=" display: block;
+                margin-left: auto;
+                margin-right: auto;"></a>
+            <a href="/upload" style="    border: none;
+        outline:none;"><img height=49px src="/serverimagedata/uploadbutton.png" style="  display: block;
+            margin-left: auto;
+            margin-right: auto;">
+            </a><a onClick="window.location.reload();"><img height=49px src="/serverimagedata/refreshicon.png" style=" display: block;
+                margin-left: auto;
+                margin-right: auto;"></a>
+        </div>
+    </div>
+    <div class="content" style="display: flex; flex-wrap: nowrap; justify-content: space-around;">
+        <a href="/logout" class="fa fa-sign-out"
+            style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
+        <a href="/recommended" class="fa fa-home"
+            style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
+        <p id="viewnumber"></p>
+        <p id="likenumber"></p>
+        <a class="fa fa-heart default" id="likebutton"
+            style="background-color: transparent; outline: none; transition: color 0.25s ease-in-out, opacity 0.25s ease-in-out;  border: none; font-size: 49px; text-align: right;"
+            onclick="likeunlike()"></a>
+    </div>
+    </div>
+    <div id="loading">
+        <div id="loader"></div>
+    </div>
+    </div>
+    <script>
+        var video = document.getElementById("myVideo");
+        var btn = document.getElementById("myBtn");
+        function pauseAndPlay() {
+            if (video.paused) {
+                video.play();
+                $(".pauseicon").addClass("hide");
+                $(".content").removeClass("pause")
+                $(".username").removeClass("pausea")
+            } else {
+                video.pause();
+                $(".pauseicon").removeClass("hide");
+                $(".content").addClass("pause")
+                $(".username").addClass("pausea")
+            }
+
+        }
+        function reverse() {
+            video.currentTime -= 5
+            go1()
+        }
+        function go1() { $("#back5").fadeIn(100).delay(500).fadeOut(100) }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/jquery.touchSwipe.js"></script>
+    <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/demos/js/main.js"></script>
+
+    <script id="code_1">
+        let number = 0
+        $(function () {
+            $("#test").swipe({
+                //Generic swipe handler for all directions
+                swipe: function (event, direction) {
+                    if (direction == "up") {
+                        number += 1
+                    }
+                    if (direction == "down") {
+                        number -= 1
+                    }
+                    $(this).text(number);
+                },
+                //Default is 75px, set to 0 for demo so any distance triggers swipe
+                threshold: 0
+            });
+        });
+    </script>
+</head>
+
+<body id="test">
+    0
+</body>
+
+</html>
