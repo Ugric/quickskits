@@ -16,4 +16,9 @@ Password: `Password123`
 hashed: `b938fb7dc46cd28044d860f311483b3de7a21c22be92adc29e5182da96086620ed6d40251cb82d05cc8ac5a38de97967faa4d70c6a94cab3f770d3cd91dbaf43` (what is stored on the server)
 
 # what does it use
-quickskit uses many different module, for the video editing it uses [moviepy](https://zulko.github.io/moviepy/), for the webengine it uses [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/) and many more ([more info](https://github.com/Ugric/quickskits/blob/master/requirements.txt))
+quickskit uses many different module, for the video editing it uses [moviepy](https://zulko.github.io/moviepy/), for the webengine it uses [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/) and many more. [more info](https://github.com/Ugric/quickskits/blob/master/requirements.txt)
+
+# how it works
+**Custom Login Module**
+[[file]]()
+hi
