@@ -634,4 +634,4 @@ def upload():
 
 
 print("quickskits booted up.")
-app.run(debug=True, host="0.0.0.0", port=4141)
+app.run(debug=False, host="0.0.0.0", port=4141)
