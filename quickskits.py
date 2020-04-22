@@ -103,6 +103,8 @@ logindatabase = logindatabase.loginBaseSetup("quickskits")
 
 viewsrequests = []
 
+uploadids = []
+
 
 def checkalreadyuploaded(filename):
     global alreadyuploaded
@@ -487,6 +489,9 @@ def upload():
                 return redirect("/login")
         userdata = logindatabase.checktoken(request.cookies["token"])
         if request.method == "POST":
+            if request.form["uploadid"] in uploadids:
+                return render_template("server message.html", messagetitle="Error", message="This video is already been uploaded.")
+            uploadids.append(request.form["uploadid"])
             global lastvideo
             videoid = randstr(30)
             files = request.files.getlist("video")
@@ -620,7 +625,7 @@ def upload():
                     return render_template("server message.html", messagetitle="Error", message="the video was too long please upload a shorter one.")
 
         else:
-            return render_template("upload.html")
+            return render_template("upload.html", uploadid=randstr(11))
     except Exception as e:
         errorlog.insert(0, {"uuid": userdata["uuid"], "error": str(e)})
         open(os.path.join(os.path.dirname(
@@ -629,4 +634,4 @@ def upload():
 
 
 print("quickskits booted up.")
-app.run(debug=False, host="0.0.0.0", port=4141)
+app.run(debug=True, host="0.0.0.0", port=4141)

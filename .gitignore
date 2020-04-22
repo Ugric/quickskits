@@ -138,6 +138,7 @@ dmypy.json
 cython_debug/
 
 *.mp4
+videogif/*.gif
 !videoassets/*.mp4
 quickskits.json
 lastvideos.json
