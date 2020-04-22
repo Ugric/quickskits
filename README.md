@@ -15,7 +15,7 @@ Password: `Password123`
 
 salt: `randomstring`
 
-hashed: `48d8d064db1456ccb3cc5697fb3014ee90808e4a7da45d3ce214f9f6db0bacabc75253a43669e05970ee5eaca0c8ff875e84b910f6e115613805b2a6c7a6414f` (what is stored on the server)
+hash(password+salt): `48d8d064db1456ccb3cc5697fb3014ee90808e4a7da45d3ce214f9f6db0bacabc75253a43669e05970ee5eaca0c8ff875e84b910f6e115613805b2a6c7a6414f` (what is stored on the server)
 
 # what does it use
 quickskit uses many different module, for the video editing it uses [moviepy](https://zulko.github.io/moviepy/), for the webengine it uses [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/) and many more. [more info](https://github.com/Ugric/quickskits/blob/master/requirements.txt)
