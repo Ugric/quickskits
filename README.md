@@ -26,8 +26,8 @@ quickskit uses many different module, for the video editing it uses [moviepy](ht
 
 **Templates folder:**
 
-[[folder]](https://github.com/Ugric/quickskits/tree/master/templates) this folder stores all the html templates used by the Source codes [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/) module
+[[folder]](https://github.com/Ugric/quickskits/tree/master/templates) this folder stores all the html templates used by the Source codes [flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/) module.
 
 **Custom Login Module:**
 
-[[folder]](https://github.com/Ugric/quickskits/tree/master/logindatabase) this module stores the info on the users
+[[folder]](https://github.com/Ugric/quickskits/tree/master/logindatabase) this module stores the info on the users, for example, usernames, hashed with salt passwords, cookie storing, UUIDs, user email addresses, the ability to add an account, login with the choice of either the username or the email address and to logout (**more features will be added in the future**)
