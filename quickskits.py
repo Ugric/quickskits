@@ -480,6 +480,7 @@ def send_video(video):
             request.cookies["token"])["uuid"], "error": str(e)})
         open(os.path.join(os.path.dirname(
             __file__), "error.log"), "w").write(json.dumps(errorlog))
+        print(str(e))
         return send_from_directory("videoassets", "quickskitsoliveintro.mp4")
 
 
@@ -634,6 +635,7 @@ def upload():
         errorlog.insert(0, {"uuid": userdata["uuid"], "error": str(e)})
         open(os.path.join(os.path.dirname(
             __file__), "error.log"), "w").write(json.dumps(errorlog))
+        print(str(e))
         return render_template("server message.html", messagetitle="Error", message="there was an Error when uploading the video. either the video was corrupt or there was another issue. this error has been logged into our error.log file for futher investigation into this error.")
 
 

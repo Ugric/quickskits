@@ -7,5 +7,6 @@ COPY . .
 
 RUN mkdir videos
 RUN mkdir videogif
+RUN mkdir temp
 
 CMD python quickskits.py
