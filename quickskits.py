@@ -475,7 +475,11 @@ def send_video(video):
     global lastvideo
     try:
         return send_from_directory("videos", video)
-    except:
+    except Exception as e:
+        errorlog.insert(0, {"uuid": logindatabase.checktoken(
+            request.cookies["token"])["uuid"], "error": str(e)})
+        open(os.path.join(os.path.dirname(
+            __file__), "error.log"), "w").write(json.dumps(errorlog))
         return send_from_directory("videoassets", "quickskitsoliveintro.mp4")
 
 
