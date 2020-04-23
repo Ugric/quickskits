@@ -77,7 +77,6 @@ class loginBaseSetup:
     def addlogin(self, username, password, email):
         passwordtested = self.check(password)
         if passwordtested == True:
-            password = generate_password_hash(password)
             for login in self.loginbase:
                 if login["user"].upper() == username.upper():
                     return {"failed": f"the username '{username}' already taken"}
@@ -85,9 +84,10 @@ class loginBaseSetup:
                     return {"failed": f"the email address '{email}' already being used on another account"}
             tempjson = {}
             tempjson["user"] = bleach.clean(username)
-            tempjson["password"] = password
-            tempjson["email"] = email
             tempjson["salt"] = randstr(100)
+            tempjson["password"] = generate_password_hash(
+                password+tempjson["salt"])
+            tempjson["email"] = email
             tempjson["uuid"] = randstr(40)
             tempjson["token"] = randstr(30)
             tempjson["verified"] = 0
@@ -108,7 +108,6 @@ class loginBaseSetup:
         return False
 
     def login(self, usernameEmail, password):
-        password = generate_password_hash(password)
         for login in self.loginbase:
             if login["user"] == usernameEmail and login["password"] == generate_password_hash(password+login["salt"]) or login["email"] == usernameEmail and login["password"] == generate_password_hash(password+login["salt"]):
                 if login["verified"] == 1:
