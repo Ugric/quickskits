@@ -514,26 +514,26 @@ def upload():
                 if checkalreadyuploaded(savedir):
                     return render_template("server message.html", messagetitle="Error", message="this video has already been uploaded try a different one.")
                 else:
-                    f.save("temp\\" + savedir)
+                    f.save("temp/" + savedir)
                     addtoalreadyuploaded(f.filename)
                     boomerrang = boomerang(
-                        "temp\\"+savedir, "videogif/", portat)
+                        "temp/"+savedir, "videogif/", portat)
                     newfile = render.render(
-                        savedir, "temp\\", portat=portat, music=music, mixer=mixer)
+                        savedir, "temp/", portat=portat, music=music, mixer=mixer)
                     try:
-                        os.remove("temp\\" + savedir)
+                        os.remove("temp/" + savedir)
                     except:
                         pass
                     if newfile != False:
                         conpressedversion = vidcompressor.compress(
-                            10000000, newfile, dirs="temp\\", savedir="videos\\"
+                            10000000, newfile, dirs="temp/", savedir="videos/"
                         )
                         try:
-                            os.remove("temp\\" + newfile)
+                            os.remove("temp/" + newfile)
                         except:
                             pass
                         portatsize = render.getportat(
-                            "videos\\" + conpressedversion)
+                            "videos/" + conpressedversion)
                         print(portatsize)
                         if portat == "portat":
                             finisheddic = {
@@ -576,22 +576,22 @@ def upload():
                 for f in files:
                     filename, file_extension = os.path.splitext(f.filename)
                     savedir = randstr(10) + file_extension
-                    f.save("temp\\" + savedir)
+                    f.save("temp/" + savedir)
                     addtoalreadyuploaded(f.filename)
                     allfiles.append(savedir)
-                    totallen += render.getlength("temp\\" + savedir)
+                    totallen += render.getlength("temp/" + savedir)
                 if totallen <= 120:
                     print(allfiles)
                     boomerrang = boomerang(
-                        "temp\\"+savedir, "videogif/", portat)
+                        "temp/"+savedir, "videogif/", portat)
                     newfile = render.renderMultiple(
-                        allfiles, "temp\\", portat=portat, music=music, mixer=mixer)
+                        allfiles, "temp/", portat=portat, music=music, mixer=mixer)
                     try:
-                        os.remove("temp\\" + savedirs)
+                        os.remove("temp/" + savedirs)
                     except:
                         pass
                     conpressedversion = vidcompressor.compress(
-                        10000000, newfile, dirs="temp\\", savedir="videos\\"
+                        10000000, newfile, dirs="temp/", savedir="videos/"
                     )
                     try:
                         os.remove(conpressedversion)
