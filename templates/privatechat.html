@@ -1,0 +1,419 @@
+<html>
+
+<head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <style>
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .obj {
+            width: 6px;
+            height: 1px;
+            background: white;
+            margin: 0 3px;
+            border-radius: 10px;
+            animation: loading 0.8s infinite;
+        }
+
+        .obj:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .obj:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .obj:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .obj:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        .obj:nth-child(6) {
+            animation-delay: 0.5s;
+        }
+
+        .obj:nth-child(7) {
+            animation-delay: 0.6s;
+        }
+
+        .obj:nth-child(8) {
+            animation-delay: 0.7s;
+        }
+
+
+        @keyframes loading {
+            0% {
+                height: 0;
+            }
+
+            50% {
+                height: 40px;
+            }
+
+            100% {
+                height: 0;
+            }
+        }
+
+        body {
+            margin: 0 auto;
+            margin-bottom: 3rem;
+            background: #000000;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        .container {
+            border: 2px solid #dedede;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 1rem;
+            max-width: 60%;
+            clear: both;
+            float: left;
+        }
+
+        .darker {
+            float: right;
+            border-color: rgb(150, 150, 150);
+            background-color: rgb(180, 180, 180);
+        }
+
+        .container::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .container img {
+            float: left;
+            max-width: 60px;
+            width: 100%;
+            margin-right: 20px;
+            border-radius: 50%;
+        }
+
+        .container img.right {
+            float: right;
+            margin-left: 20px;
+            margin-right: 0;
+        }
+
+        .time-right {
+            float: right;
+            color: rgb(31, 31, 31);
+        }
+
+        .time-left {
+            float: left;
+            color: #999;
+        }
+
+
+        ul.topnav {
+            list-style-type: none;
+            margin: 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        ul.topnav li {
+            float: left;
+        }
+
+        ul.topnav li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        ul.topnav li a:hover:not(.active) {
+            background-color: #111;
+        }
+
+        ul.topnav li a.active {
+            background-color: rgb(155, 155, 155);
+        }
+
+        ul.topnav li.right {
+            float: right;
+        }
+
+        @media screen and (max-width: 600px) {
+
+            ul.topnav li.right,
+            ul.topnav li {
+                float: none;
+            }
+        }
+
+        .active {
+            background-color: rgb(155, 155, 155);
+        }
+
+        #chatroot {
+            padding-bottom: 70px;
+        }
+
+        #chatbar {
+            background-image: linear-gradient(135deg, hsla(0, 0%, 96%, 0.5) 0%, #272727 100%);
+            position: fixed;
+            height: 50px;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #chatbox {
+            margin: 1rem;
+            width: 90%;
+            line-height: 24px;
+            font-size: 20px;
+            border: none;
+        }
+
+        .chatline {
+            font-family: Helvetica Neue;
+            font-size: 16px;
+        }
+
+        .statusline {
+            font-family: Helvetica Neue;
+            font-size: 12px;
+            margin-bottom: -10px;
+        }
+
+        .status-bot {
+            color: #666666;
+        }
+
+        .status-human {
+            color: #cacaca;
+        }
+
+        input {
+            padding-left: 8px;
+        }
+
+        #tick-mark {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+        }
+
+        #tick-mark::before {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            height: 50%;
+            width: 3px;
+            background-color: #585858;
+            content: "";
+            transform: translateX(10px) rotate(-45deg);
+            transform-origin: left bottom;
+        }
+
+        #tick-mark::after {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            width: 100%;
+            background-color: #3a3a3a;
+            content: "";
+            transform: translateX(10px) rotate(-45deg);
+            transform-origin: left bottom;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .submitbutton {
+            margin: 10px;
+            width: 10%;
+            line-height: 24px;
+            font-size: 20px;
+            border: none;
+        }
+    </style>
+    <script>
+        let firstLoad = true
+        let curentjson;
+        let curentupdatenumber;
+        const updatemessages = async (number) => {
+            try {
+                const response = await fetch("/privatemessage/" + number + "/getjson?user={{chatuser}}")
+                const list = await response.json()
+                const json = list.chat
+                const updatenumber = list.updatenumber
+                if (updatenumber != curentupdatenumber) {
+                    const messages = document.getElementById("chatdiv")
+                    renderhtml = ''
+                    for (i = 0; i < json.length; i++) {
+                        date = new Date(json[i].timestamp * 1000)
+                        if (json[i].me == 1) {
+                            if (json.length == i + 1) {
+                                if (json[i].read == "true") {
+                                    renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
+                                } else {
+                                    renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
+                                }
+                            } else {
+                                if (json[i].read == "true") {
+                                    console.log(json[i].read)
+                                    renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
+                                } else {
+                                    console.log(json[i].read)
+                                    renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
+                                }
+                            }
+                        } else {
+                            if (json.length == i + 1) {
+                                renderhtml += '<div id="newmessage" class="container" style="margin-bottom: 5rem;"><h4 style="color: red;">New Message!</h4><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-left">' + date.toLocaleString() + '</span></div>'
+                            } else {
+                                renderhtml += '<div class="container"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-left">' + date.toLocaleString() + '</span></div>'
+                            }
+                        }
+
+                    }
+                    messages.innerHTML = renderhtml
+                    try {
+                        document.getElementById('newmessage').scrollIntoView({
+                            behavior: !firstLoad ? "smooth" : undefined
+                        });
+                    }
+                    catch (err) {
+                    }
+                    curentjson = json
+                    curentupdatenumber = updatenumber
+                }
+                firstLoad = false
+            }
+
+            catch (err) {
+                const messages = document.getElementById("chatdiv")
+                if (messages.innerHTML != curentjson) {
+                    messages.innerHTML = document.getElementById("loadingscreen").innerHTML
+                    curentjson = document.getElementById("loadingscreen").innerHTML;
+                }
+                firstLoad = true
+            }
+        }
+
+        const sendtypingmessage = async () => {
+            const response = await fetch("/privatemessage/starttyping?user={{chatuser}}")
+        }
+
+        const sendChat = async (e) => {
+            e.preventDefault();
+            if (e.target.elements[0].value != "") {
+                const value = e.target.elements[0].value
+                e.target.elements[0].value = ""
+                const sendmessage = await fetch("/privatemessage/message?user={{chatuser}}", {
+                    method: "POST", headers: {
+                        'Content-Type': 'application/json'
+                    }, body: JSON.stringify({ message: value })
+                })
+                const message_response = await sendmessage.text()
+                if (message_response != "true") {
+                    alert(message_response);
+                }
+                updatemessages(1);
+            }
+        }
+        updatemessages(0);
+        setInterval(function () { updatemessages(1) }, 500);
+    </script>
+    <script>
+        const istyping = async () => {
+            const typingmessage = document.getElementById("typingmessage")
+            const response = await fetch("/privatemessage/istyping?user={{chatuser}}")
+            const text = await response.text()
+            if (text == "true") {
+                typingmessage.classList.remove("hide")
+            } else {
+                typingmessage.classList.add("hide")
+            }
+        }
+        istyping();
+        setInterval(istyping, 1000);
+    </script>
+</head>
+
+<body>
+    <ul class="topnav">
+        <li><a class="active" href="/recommended">Home</a></li>
+        <li><a onclick="window.history.back();">Go Back</a></li>
+        <li>
+            <p style="color: white; text-align: center;padding: 0px 16px;"><b>Powered by BeefChat</b></p>
+        </li>
+        <li>
+            <p style="color: white; text-align: center;padding: 0px 16px;">{{chatuser}}</p>
+        </li>
+        <li id="typingmessage" class="hide">
+            <p style="color: white; text-align: center;padding: 0px 16px;">typing...</p>
+        </li>
+
+    </ul>
+    <div id="chatdiv" style="margin-top: 11rem;">
+        <div class="loading">
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+        </div>
+    </div>
+    <div style="display: none;" id="loadingscreen">
+        <div class="loading">
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+            <div class="obj"></div>
+        </div>
+    </div>
+    <div style="bottom: 0;">
+        <div id="chatbar">
+            <form onsubmit="sendChat(event)">
+                <input type="text" id="chatbox" placeholder="Message..." oninput="sendtypingmessage()" />
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -141,6 +141,7 @@ cython_debug/
 videogif/*.gif
 !videoassets/*.mp4
 quickskits.json
+quickchat.json
 lastvideos.json
 error.log
 Dockerfile

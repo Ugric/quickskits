@@ -31,6 +31,7 @@ import json
 import time
 from millify import millify
 import random
+import privatemessage
 print("quickskits booting up...")
 
 serverurl = "https://quickskits.app/"
@@ -98,6 +99,8 @@ except:
 alreadyuploaded = []
 
 logindatabase = logindatabase.loginBaseSetup("quickskits")
+
+privatemessages = privatemessage.startchats("quickchat")
 
 """vpndetector.detectvpn(app, vpnlist)"""
 
@@ -271,22 +274,29 @@ def favicons(files):
 
 @app.route("/user")
 def userprofile():
+    if 'token' not in request.cookies:
+        return redirect("/login")
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return redirect("/login")
     user = request.args["user"].replace("-", " ")
     if request.user_agent.platform == "windows":
         return render_template("quickskitsindex.html")
     userinfo = logindatabase.getuserinfofromusername(user)
-    output = []
     if userinfo != False:
-        return render_template("profile.html", username=user)
+        return render_template("profile.html", username=user, usernamedash=user.replace(" ", "-"))
     else:
         return "the user '"+user+"' could not be found on our servers."
 
 
 @app.route("/user/getvideos")
 def userprofilejson():
-    user = request.args["user"].replace("-", " ")
+    if 'token' not in request.cookies:
+        return "false"
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return "false"
     if request.user_agent.platform == "windows":
         return render_template("quickskitsindex.html")
+    user = request.args["user"].replace("-", " ")
     userinfo = logindatabase.getuserinfofromusername(user)
     output = []
     if userinfo != False:
@@ -314,6 +324,7 @@ def getjsonlatest(video, number):
         for latestvideo in lastvideo:
             userinfo = logindatabase.getuserinfofromuuid(
                 latestvideo["uuid"])
+            print(userinfo)
             video = {}
             video["src"] = latestvideo["src"]
             video["title"] = latestvideo["title"]
@@ -327,6 +338,7 @@ def getjsonlatest(video, number):
             video["likes"] = len(latestvideo["likedlist"])
             video["username"] = userinfo["user"]
             finishedvideo.append(video)
+        print(video)
         return jsonify(finishedvideo)
     elif video == "video":
         viewerinfo = logindatabase.checktoken(request.cookies["token"])
@@ -639,5 +651,114 @@ def upload():
         return render_template("server message.html", messagetitle="Error", message="there was an Error when uploading the video. either the video was corrupt or there was another issue. this error has been logged into our error.log file for futher investigation into this error.")
 
 
+## PRIVATE MESSAGING ##
+
+@app.route("/privatemessage/")
+def privatem():
+    if request.user_agent.platform == "windows":
+        return render_template("quickskitsindex.html")
+    if 'token' not in request.cookies:
+        return redirect("/login")
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return redirect("/login")
+    else:
+        user = request.args["user"].replace("-", " ")
+        requestuserdata = logindatabase.getuserinfofromusername(user)
+        userdata = logindatabase.checktoken(request.cookies["token"])
+        if requestuserdata != userdata:
+            if requestuserdata != False:
+                return render_template("privatechat.html", chatuser=requestuserdata["user"])
+            else:
+                return render_template("server message.html", messagetitle="Error", message="that user doesnt exist.")
+        else:
+            return render_template("server message.html", messagetitle="Error", message="you cant chat to yourself silly.")
+
+
+@app.route("/privatemessage/<path:number>/getjson")
+def privatemj(number):
+    if request.user_agent.platform == "windows":
+        return "your plateform is not supported"
+    if 'token' not in request.cookies:
+        return "your logged out"
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return "your logged out"
+    else:
+        user = request.args["user"].replace("-", " ")
+        requestuserdata = logindatabase.getuserinfofromusername(user)
+        userdata = logindatabase.checktoken(request.cookies["token"])
+        if requestuserdata != userdata:
+            if requestuserdata != False:
+                return jsonify(privatemessages.getchat(requestuserdata, userdata, number))
+            else:
+                return "that user doesnt exist."
+        else:
+            return "you cant chat to yourself silly."
+
+
+@app.route("/privatemessage/message", methods=["POST"])
+def privateadd():
+    if request.user_agent.platform == "windows":
+        return "your plateform is not supported"
+    if 'token' not in request.cookies:
+        return "your logged out"
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return "your logged out"
+    else:
+        user = request.args["user"].replace("-", " ")
+        requestuserdata = logindatabase.getuserinfofromusername(user)
+        userdata = logindatabase.checktoken(request.cookies["token"])
+        message = request.json["message"]
+        if requestuserdata != userdata:
+            if requestuserdata != False:
+                return privatemessages.addmessage(requestuserdata, userdata, message)
+            else:
+                return "that user doesnt exist."
+        else:
+            return "you cant chat to yourself silly."
+
+
+@app.route("/privatemessage/starttyping")
+def starttype():
+    if request.user_agent.platform == "windows":
+        return "your plateform is not supported"
+    if 'token' not in request.cookies:
+        return "your logged out"
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return "your logged out"
+    else:
+        user = request.args["user"].replace("-", " ")
+        requestuserdata = logindatabase.getuserinfofromusername(user)
+        userdata = logindatabase.checktoken(request.cookies["token"])
+        if requestuserdata != userdata:
+            if requestuserdata != False:
+                return privatemessages.starttyping(requestuserdata, userdata)
+            else:
+                return "that user doesnt exist."
+        else:
+            return "you cant chat to yourself silly."
+
+
+@app.route("/privatemessage/istyping")
+def istype():
+    if request.user_agent.platform == "windows":
+        return "your plateform is not supported"
+    if 'token' not in request.cookies:
+        return "your logged out"
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return "your logged out"
+    else:
+        user = request.args["user"].replace("-", " ")
+        requestuserdata = logindatabase.getuserinfofromusername(user)
+        userdata = logindatabase.checktoken(request.cookies["token"])
+        if requestuserdata != userdata:
+            if requestuserdata != False:
+                return privatemessages.istyping(requestuserdata, userdata)
+            else:
+                return "that user doesnt exist."
+        else:
+            return "you cant chat to yourself silly."
+
+
+## Start Up ##
 print("quickskits booted up.")
-app.run(debug=False, host="0.0.0.0", port=4141)
+app.run(debug=True, host="0.0.0.0", port=4141)

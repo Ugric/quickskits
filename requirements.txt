@@ -7,3 +7,4 @@ millify==0.1.1
 login==0.0.6
 moviepy==1.0.0
 password_strength==0.0.3.post2
+timeago==1.0.14
