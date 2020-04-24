@@ -55,12 +55,12 @@ class startchats:
                         renderjson.append({"message": change_links(bleach.clean(message["message"])), "user": bleach.clean(
                             requestuserinfo["user"].upper()), "timestamp": message["timestamp"], "me": 0})
                 if renderjson == []:
-                    return {"chat": renderjson, "updatenumber": chat["updatenumber"]}[{
+                    return {"chat": [{
                         "me": 0,
                         "message": "Welcome to your new chat! type a message to get started.",
                         "timestamp": 0,
                         "user": "QUICKCHAT"
-                    }]
+                    }], "updatenumber": 0}
                 return {"chat": renderjson, "updatenumber": chat["updatenumber"]}
         self.privatechats.append(
             {"useruuid": userinfo["uuid"], "requestuuid": requestuserinfo["uuid"], "messages": [], "updatenumber": 0, "requestuuidtyping": 0, "useruuidtyping": 0})
