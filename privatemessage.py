@@ -77,7 +77,7 @@ class startchats:
         for chat in self.privatechats:
             if chat["requestuuid"] == requestuserinfo["uuid"] and chat["useruuid"] == userinfo["uuid"] or chat["useruuid"] == requestuserinfo["uuid"] and chat["requestuuid"] == userinfo["uuid"]:
                 chat["messages"].append(
-                    {"uuid": userinfo["uuid"], "message": message, "timestamp": datetime.timestamp(datetime.now()), "read": "false", "new": 0})
+                    {"uuid": userinfo["uuid"], "message": message.replace(":)", "🙂").replace(":(", "😔").replace("(:", "🙂").replace("):", "😔").replace("XD", "😂").replace(":D", "😃"), "timestamp": datetime.timestamp(datetime.now()), "read": "false", "new": 0})
                 chat["updatenumber"] += 1
                 open(os.path.join(os.path.dirname(
                     __file__), self.chat+".json"), "w").write(json.dumps(self.privatechats))
