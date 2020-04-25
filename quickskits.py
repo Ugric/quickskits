@@ -651,7 +651,20 @@ def upload():
         return render_template("server message.html", messagetitle="Error", message="there was an Error when uploading the video. either the video was corrupt or there was another issue. this error has been logged into our error.log file for futher investigation into this error.")
 
 
+@app.route("/checknotifications")
+def checknotifications():
+    if request.user_agent.platform == "windows":
+        return "your plateform is not supported"
+    if 'token' not in request.cookies:
+        return "your logged out"
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return "your logged out"
+    else:
+        userdata = logindatabase.checktoken(request.cookies["token"])
+        return jsonify(logindatabase.checknotifications(userdata["uuid"]))
+
 ## PRIVATE MESSAGING ##
+
 
 @app.route("/privatemessage/")
 def privatem():
@@ -710,6 +723,8 @@ def privateadd():
         message = request.json["message"]
         if requestuserdata != userdata:
             if requestuserdata != False:
+                logindatabase.addnotification(requestuserdata["uuid"], {"new": True, "user": userdata["user"], "info": bleach.clean(
+                    message), "link": "/privatemessage/?user="+userdata["user"].replace(" ", "-")})
                 return privatemessages.addmessage(requestuserdata, userdata, message)
             else:
                 return "that user doesnt exist."
@@ -761,4 +776,4 @@ def istype():
 
 ## Start Up ##
 print("quickskits booted up.")
-app.run(debug=False, host="0.0.0.0", port=4141)
+app.run(debug=True, host="0.0.0.0", port=4141)

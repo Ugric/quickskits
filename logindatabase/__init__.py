@@ -17,11 +17,8 @@ class loginBaseSetup:
             open(os.path.join(os.path.dirname(
                 __file__), self.loginstoredname+".json"), "w").write("[]")
             self.loginbase = []
-        self.policy = PasswordPolicy.from_names(length=8,  # min length: 8
-                                                uppercase=1,  # need min. 2 uppercase letters
-                                                numbers=2,  # need min. 2 digits
-                                                # need min. 2 non-letter characters (digits, specials, anything)
-                                                nonletters=2,)
+        self.policy = PasswordPolicy.from_names(length=5,
+                                                numbers=1,)
         set_salt(
             "1811ccff35d7a09bb2adf7236fecb10e3bad48c460e6b270a60dc3427812abc75e3a45bbd10f8bf397c69e1c84a46760a26efbdf992f45a5be292e65bd6212e8"
         )
@@ -48,6 +45,27 @@ class loginBaseSetup:
         self.loginbase.append(jsons)
         open(os.path.join(os.path.dirname(
             __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+
+    def checknotifications(self, uuid):
+        for user in self.loginbase:
+            if user["uuid"] == uuid:
+                if "notification" not in user:
+                    user["notification"] = {"new": False}
+                    open(os.path.join(os.path.dirname(
+                        __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+                jsonnotification = user["notification"]
+                if user["notification"]["new"] == True:
+                    jsonnotification["new"] = True
+                    user["notification"] = {"new": False}
+                return jsonnotification
+        return {"new": False}
+
+    def addnotification(self, uuid, notificationjson):
+        for user in self.loginbase:
+            if user["uuid"] == uuid:
+                user["notification"] = notificationjson
+                return True
+        return False
 
     def verify(self, verificationkey):
         for login in self.loginbase:
@@ -91,6 +109,7 @@ class loginBaseSetup:
             tempjson["uuid"] = randstr(40)
             tempjson["token"] = randstr(30)
             tempjson["verified"] = 0
+            tempjson["notifications"] = {"new": False}
             tempjson["timestamp"] = datetime.timestamp(datetime.now())
             tempjson["verificationkey"] = randstr(50)
             self.adddata(tempjson)

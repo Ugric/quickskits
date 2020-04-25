@@ -183,6 +183,95 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/jquery.touchSwipe.js"></script>
     <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/demos/js/main.js"></script>
+    <style>
+        #snackbar {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: rgb(110, 110, 110);
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 30px;
+            font-size: 17px;
+        }
+
+        #snackbar.show {
+            visibility: visible;
+            -webkit-animation: fadein 1s, fadeout 1s 2.5s;
+            animation: fadein 1s, fadeout 1s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+
+            to {
+                top: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadein {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+
+            to {
+                top: 30px;
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes fadeout {
+            from {
+                top: 30px;
+                opacity: 1;
+            }
+
+            to {
+                top: 0;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                top: 30px;
+                opacity: 1;
+            }
+
+            to {
+                top: 0;
+                opacity: 0;
+            }
+        }
+    </style>
+    <script>
+        function shownotification(message, link) {
+            const x = document.getElementById("snackbar");
+            const notificationlink = document.getElementById("snackbarlink")
+            notificationlink.innerHTML = message
+            notificationlink.href = link
+            x.className = "show";
+            setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+        }
+        const checknotifications = async () => {
+            const response = await fetch("/checknotifications")
+            const notificationinfo = await response.json()
+            if (notificationinfo.new != false && notificationinfo.link != window.location.pathname + window.location.search) {
+                shownotification(notificationinfo.user + ": " + notificationinfo.info, notificationinfo.link)
+            }
+        }
+        setInterval(checknotifications, 5000);
+    </script>
     <script>
         let videojson = {}
         let recommended = []
@@ -400,7 +489,7 @@
 </head>
 
 <body id="body" onload="getlistandlatest()">
-
+    <div id="snackbar"><a id="snackbarlink" style="color: white; text-decoration: none;"></a></div>
     <video width=100% height=100% id="myVideo" onclick="pauseAndPlay()" ondblclick="dblike()"
         style="position: fixed; right: 0; bottom: 0; border-top-left-radius: 10px; border-top-right-radius: 10px;"
         src="" type="video/mp4" autoplay loop playsinline>
