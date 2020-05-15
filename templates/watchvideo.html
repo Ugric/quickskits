@@ -261,10 +261,11 @@
             const response = await fetch("/checknotifications")
             const notificationinfo = await response.json()
             if (notificationinfo.new != false && notificationinfo.link != window.location.pathname + window.location.search) {
+                if (notificationinfo.info.length >= 15) notificationinfo.info = notificationinfo.info.substr(0, 15) + "..."
                 shownotification(notificationinfo.user + ": " + notificationinfo.info, notificationinfo.link)
             }
         }
-        setInterval(checknotifications, 5000);
+        setInterval(checknotifications, 1000);
     </script>
     <script>
         let videojson = {}
@@ -281,7 +282,6 @@
             htmltitle.innerHTML = "loading...";
             username.innerHTML = "";
             title.innerHTML = "";
-            likenumber.innerHTML = "";
             viewnumber.interHTML = "";
             description.innerHTML = "";
             $("#myVideo").slideUp(0);
@@ -356,20 +356,25 @@
     <script type="text/javascript" src="http://labs.rampinteractive.co.uk/touchSwipe/demos/js/main.js"></script>
     <script>
         likes = 0
-        function getlikevariable() { likes = parseInt(getvideojson().likes) }
+        function getlikevariable() { likes = parseInt(videojson.likes) }
         const likeunlike = async () => {
             var element = document.getElementById("likebutton");
             if ($("#likebutton").hasClass("like") == false) {
                 $("#likebutton").addClass("like");
                 $("#likebutton").removeClass("default");
+                $("#likebutton").addClass("like");
+                $("#likebutton").removeClass("default");
                 likes += 1
                 if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
-                const response = await fetch("/likebutton/like/" + getvideojson().videoid)
+                const response = await fetch("/likebutton/like/" + videojson.videoid)
                 const jsonified = await response.text()
+                videojson.likes = likes
+                videojson.videoliked = "true"
                 if (jsonified != "true") {
                     $("#likebutton").removeClass("like");
                     $("#likebutton").addClass("default");
-                    likes = getvideojson().likes
+                    likes = videojson.likes
+                    videojson.videoliked = "false"
                     if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
                 }
             } else {
@@ -377,22 +382,46 @@
                 $("#likebutton").addClass("default");
                 likes -= 1
                 if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
-                const response = await fetch("/likebutton/unlike/" + getvideojson().videoid)
+                const response = await fetch("/likebutton/unlike/" + videojson.videoid)
                 const jsonified = await response.text()
+                videojson.likes = likes
+                videojson.videoliked = "false"
                 if (jsonified != "true") {
                     $("#likebutton").addClass("like");
                     $("#likebutton").removeClass("default");
-                    likes = getvideojson().likes
+                    likes = videojson.likes
+                    videojson.videoliked = "true"
                     if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
                 }
             }
         }
+        const dislikeundislike = async () => {
+            var element = document.getElementById("dislikebutton");
+            if ($("#dislikebutton").hasClass("dislike") == false) {
+                $("#dislikebutton").addClass("dislike");
+                $("#dislikebutton").removeClass("default");
+                if (videojson.videoliked == "true") {
+                    unlike()
+                    likes = videojson.likes
+                    if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
+                }
+                const response = await fetch("/likebutton/dislike/" + videojson.videoid)
+                const jsonified = await response.text()
+                if (jsonified != "true") {
+                    if (videojson.videoliked == "true") {
+                        videojson.videoliked = "false"
+                        videojson.likes -= 1
+                    }
+                }
+            }
+        }
         const getlikes = async () => {
-            const response = await fetch("/likebutton/getlikes/" + getvideojson().videoid)
+            const response = await fetch("/likebutton/getlikes/" + videojson.videoid)
             const jsonified = await response.json()
             if (jsonified.likes != likes) {
-                if (jsonified.likes != undefined) {
+                if (jsonified.likes != null) {
                     likes = jsonified.likes
+                    videojson.likes = jsonified.likes
                     if (likes == 1) { likenumber.innerHTML = likes + " like" } else { likenumber.innerHTML = likes + " likes" }
                 }
             }
@@ -431,11 +460,19 @@
             const text = await response.text()
 
             if (text != "true") {
-                location.replace("/login")
+                location.replace("/share/{{videoid}}")
             }
         }
         updatemessages()
         setInterval(updatemessages, 5000);
+        function copyToClipboard(text) {
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        }
     </script>
 </head>
 
@@ -482,7 +519,7 @@ background-color: transparent; outline: none;  border: none; font-size: 100px; t
         outline:none;"><img height=49px src="/serverimagedata/uploadbutton.png" style="  display: block;
             margin-left: auto;
             margin-right: auto;">
-            </a><a onClick="window.location.reload();"><img height=49px src="/serverimagedata/refreshicon.png" style=" display: block;
+            </a><a onClick="getlatest('{{videoid}}')"><img height=49px src="/serverimagedata/refreshicon.png" style=" display: block;
                 margin-left: auto;
                 margin-right: auto;"></a>
         </div>
@@ -492,6 +529,10 @@ background-color: transparent; outline: none;  border: none; font-size: 100px; t
             style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
         <a href="/recommended" class="fa fa-home"
             style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
+        <a href="/profile" class="fa fa-user-circle-o"
+            style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
+        <a class="fa fa-share-alt" style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"
+            onclick="copyToClipboard(window.location.href); alert('shareable link copied to clipboard')"></a>
         <p id="viewnumber"></p>
         <p id="likenumber"></p>
         <a class="fa fa-heart default" id="likebutton"

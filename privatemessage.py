@@ -1,9 +1,11 @@
 from randstr import randstr
 import json
 from datetime import datetime
+import datetime as date
 import os
 import bleach
 import re
+import timeago
 from urllib.parse import urlparse
 
 
@@ -38,23 +40,30 @@ class startchats:
                 __file__), chat+".json"), "w").write("[]")
             self.privatechats = []
 
-    def getchat(self, requestuserinfo, userinfo, number):
+    def getchat(self, requestuserinfo, userinfo, number=0):
+        number = int(number)
         for chat in self.privatechats:
             if chat["requestuuid"] == requestuserinfo["uuid"] and chat["useruuid"] == userinfo["uuid"] or chat["useruuid"] == requestuserinfo["uuid"] and chat["requestuuid"] == userinfo["uuid"]:
                 renderjson = []
                 for message in chat["messages"]:
+                    if "requested" not in message:
+                        message["requested"] = []
                     if message["uuid"] == userinfo["uuid"]:
-                        renderjson.append({"message": change_links(bleach.clean(
-                            message["message"])), "user": "ME", "timestamp": message["timestamp"], "me": 1, "read": message["read"]})
+                        if number != 1:
+                            renderjson.append({"message": change_links(bleach.clean(
+                                message["message"])), "user": "ME", "timestamp": message["timestamp"], "me": 1, "read": message["read"]})
                     else:
                         if message["read"] == "false":
                             chat["updatenumber"] += 1
                             message["read"] = "true"
                             open(os.path.join(os.path.dirname(
                                 __file__), self.chat+".json"), "w").write(json.dumps(self.privatechats))
-                        renderjson.append({"message": change_links(bleach.clean(message["message"])), "user": bleach.clean(
-                            requestuserinfo["user"].upper()), "timestamp": message["timestamp"], "me": 0})
-                if renderjson == []:
+                        if number != 1 or userinfo["uuid"] not in message["requested"]:
+                            renderjson.append({"message": change_links(bleach.clean(message["message"])), "user": bleach.clean(
+                                requestuserinfo["user"].upper()), "timestamp": message["timestamp"], "me": 0})
+                            if userinfo["uuid"] not in message["requested"]:
+                                message["requested"].append(userinfo["uuid"])
+                if renderjson == [] and number != 1:
                     return {"chat": [{
                         "me": 0,
                         "message": "Welcome to your new chat! type a message to get started.",
@@ -75,9 +84,9 @@ class startchats:
 
     def addmessage(self, requestuserinfo, userinfo, message):
         for chat in self.privatechats:
-            if chat["requestuuid"] == requestuserinfo["uuid"] and chat["useruuid"] == userinfo["uuid"] or chat["useruuid"] == requestuserinfo["uuid"] and chat["requestuuid"] == userinfo["uuid"]:
+            if chat["requestuuid"] == requestuserinfo["uuid"] and chat["useruuid"] == userinfo["uuid"] or chat["useruuid"] == requestuserinfo["uuid"] and chat["requestuuid"] == userinfo["uuid"] and message != "":
                 chat["messages"].append(
-                    {"uuid": userinfo["uuid"], "message": message.replace(":)", "🙂").replace(":(", "😔").replace("(:", "🙂").replace("):", "😔").replace("XD", "😂").replace(":D", "😃"), "timestamp": datetime.timestamp(datetime.now()), "read": "false", "new": 0})
+                    {"uuid": userinfo["uuid"], "message": message, "timestamp": datetime.timestamp(datetime.now()), "read": "false", "requested": []})
                 chat["updatenumber"] += 1
                 open(os.path.join(os.path.dirname(
                     __file__), self.chat+".json"), "w").write(json.dumps(self.privatechats))
@@ -93,6 +102,188 @@ class startchats:
                 chat["useruuidtyping"] = datetime.timestamp(datetime.now())
                 return "true"
         return "false"
+
+    def allcontacts(self, userinfo, logindatabase):
+        output = []
+        for chat in self.privatechats:
+            if chat["requestuuid"] == userinfo["uuid"]:
+                user = logindatabase.getuserinfofromuuid(
+                    chat["useruuid"])
+                if chat["messages"] == []:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(
+                                    user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "false" and chat["messages"][-1]["uuid"] == userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(
+                                    user["user"]).replace(" ", "-"), "status": "read", "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "read", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "read", "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "false" and chat["messages"][-1]["uuid"] != userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(
+                                    user["user"]).replace(" ", "-"), "status": "opened", "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "opened", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "opened", "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "true" and chat["messages"][-1]["uuid"] == userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(
+                                    " ", "-"), "status": "delivered | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "delivered | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "delivered | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "true" and chat["messages"][-1]["uuid"] != userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(
+                                    " ", "-"), "status": "NEW MESSAGE | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "NEW MESSAGE | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "NEW MESSAGE | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+
+            elif chat["useruuid"] == userinfo["uuid"]:
+                user = logindatabase.getuserinfofromuuid(
+                    chat["requestuuid"])
+                if chat["messages"] == []:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(
+                                    " ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "false" and chat["messages"][-1]["uuid"] == userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(
+                                    user["user"]).replace(" ", "-"), "status": "read", "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "read", "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "false" and chat["messages"][-1]["uuid"] != userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(
+                                    user["user"]).replace(" ", "-"), "status": "opened", "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "opened", "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "true" and chat["messages"][-1]["uuid"] == userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(
+                                    " ", "-"), "status": "delivered | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "delivered | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                elif chat["messages"][-1]["read"] != "true" and chat["messages"][-1]["uuid"] != userinfo["uuid"]:
+                    if output != []:
+                        finished = 0
+                        i = 0
+                        for contact in output:
+                            if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
+                                finished = 1
+                                output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(
+                                    " ", "-"), "status": "NEW MESSAGE | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+                                break
+                            i += 1
+                        if finished == 0:
+                            output.append(
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                    else:
+                        output.append(
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "NEW MESSAGE | " + timeago.format(chat["messages"][-1]["timestamp"], datetime.now()), "timestamp": chat["messages"][-1]["timestamp"]})
+        return output
 
     def istyping(self, requestuserinfo, userinfo):
         for chat in self.privatechats:

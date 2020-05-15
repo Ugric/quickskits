@@ -263,14 +263,16 @@
             const response = await fetch("/checknotifications")
             const notificationinfo = await response.json()
             if (notificationinfo.new != false) {
+                if (notificationinfo.info.length >= 15) notificationinfo.info = notificationinfo.info.substr(0, 15) + "..."
                 shownotification(notificationinfo.user + ": " + notificationinfo.info, notificationinfo.link)
             }
         }
-        setInterval(checknotifications, 5000);
+        setInterval(checknotifications, 1000);
     </script>
     <script>
         let videojson = {}
         let recommended = []
+        let videolink = ""
         const getlistandlatest = async () => {
             const response = await fetch("/getjson/latest/0")
             recommended = await response.json()
@@ -309,6 +311,7 @@
 
             }
             try {
+                videolink = document.location.origin + "/watch/" + videojson.videoid
                 const response = fetch("/view/" + videojson.videoid)
                 vid.load();
                 vid.addEventListener('loadeddata', function () {
@@ -454,11 +457,19 @@
             const text = await response.text()
 
             if (text != "true") {
-                location.replace("/login")
+                location.replace(videolink)
             }
         }
         updatemessages()
         setInterval(updatemessages, 5000);
+        function copyToClipboard(text) {
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        }
     </script>
 </head>
 
@@ -508,10 +519,10 @@ background-color: transparent; outline: none;  border: none; font-size: 100px; t
         outline:none;"><img height=49px src="/serverimagedata/uploadbutton.png" style="  display: block;
             margin-left: auto;
             margin-right: auto;">
-            </a><a onClick="window.location.reload();"><img height=49px src="/serverimagedata/refreshicon.png" style=" display: block;
-                margin-left: auto;
-                margin-right: auto;"></a><a onClick="backskit()"><img height=49px src="/serverimagedata/back.png"
+            </a><a onClick="skitnumber = 0; getlistandlatest();"><img height=49px src="/serverimagedata/refreshicon.png"
                     style=" display: block;
+            margin-left: auto;
+            margin-right: auto;"></a><a onClick="backskit()"><img height=49px src="/serverimagedata/back.png" style=" display: block;
                 margin-left: auto;
                 margin-right: auto;"></a>
         </div>
@@ -521,6 +532,10 @@ background-color: transparent; outline: none;  border: none; font-size: 100px; t
             style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
         <a href="/recommended" class="fa fa-star-o"
             style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
+        <a href="/profile" class="fa fa-user-circle-o"
+            style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"></a>
+        <a class="fa fa-share-alt" style="font-size: 49px; color: gray; text-decoration: none; opacity: 0.7;"
+            onclick="copyToClipboard(videolink); alert('shareable link copied to clipboard')"></a>
         <p id="viewnumber"></p>
         <p id="likenumber"></p>
         <a class="fa fa-heart default" id="likebutton"

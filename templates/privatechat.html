@@ -2,6 +2,9 @@
 
 <head>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="apple-touch-startup-image" href="/favicon/favicon-32x32.png">
+    <meta name="apple-mobile-web-app-title" content="QuickSkits">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
     <link rel="manifest" href="/favicon/site.webmanifest">
@@ -11,6 +14,7 @@
     <meta name="msapplication-config" content="/favicon/browserconfig.xml">
     <meta name="theme-color" content="#000000">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title id="htmltitle">loading...</title>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <style>
         .loading {
@@ -348,6 +352,7 @@
             const response = await fetch("/checknotifications")
             const notificationinfo = await response.json()
             if (notificationinfo.new != false && notificationinfo.link != window.location.pathname + window.location.search) {
+                if (notificationinfo.info.length >= 15) notificationinfo.info = notificationinfo.info.substr(0, 15) + "..."
                 shownotification(notificationinfo.user + ": " + notificationinfo.info, notificationinfo.link)
             }
         }
@@ -358,40 +363,59 @@
         let curentjson;
         let curentupdatenumber;
         const updatemessages = async (number) => {
-            try {
-                const response = await fetch("/privatemessage/" + number + "/getjson?user={{chatuser}}")
-                const list = await response.json()
-                const json = list.chat
-                const updatenumber = list.updatenumber
-                if (updatenumber != curentupdatenumber) {
-                    const messages = document.getElementById("chatdiv")
-                    renderhtml = ''
-                    for (i = 0; i < json.length; i++) {
-                        date = new Date(json[i].timestamp * 1000)
-                        if (json[i].me == 1) {
-                            if (json.length == i + 1) {
-                                if (json[i].read == "true") {
-                                    renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
-                                } else {
-                                    renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
-                                }
+            const response = await fetch("/privatemessage/" + number + "/getjson?user={{chatuser}}")
+            const list = await response.json()
+            const json = list.chat
+            const updatenumber = list.updatenumber
+            if (updatenumber != curentupdatenumber || number == 1) {
+                document.getElementById("chatbox").disabled = false;
+                const messages = document.getElementById("chatdiv")
+                renderhtml = ''
+                for (i = 0; i < json.length; i++) {
+                    date = new Date(json[i].timestamp * 1000)
+                    if (json[i].me == 1) {
+                        if (json.length == i + 1) {
+                            if (json[i].read == "true") {
+                                renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
                             } else {
-                                if (json[i].read == "true") {
-                                    renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
-                                } else {
-                                    renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
-                                }
+                                renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
                             }
+                            document.getElementById("htmltitle").innerHTML = json[i].user + ": " + json[i].message
                         } else {
-                            if (json.length == i + 1) {
-                                renderhtml += '<div id="newmessage" class="container" style="margin-bottom: 5rem;"><h4 style="color: red;">New Message!</h4><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-left">' + date.toLocaleString() + '</span></div>'
+                            if (json[i].read == "true") {
+                                renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
                             } else {
-                                renderhtml += '<div class="container"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-left">' + date.toLocaleString() + '</span></div>'
+                                renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
                             }
                         }
-
+                    } else {
+                        if (json.length == i + 1) {
+                            renderhtml += '<div id="newmessage" class="container" style="margin-bottom: 5rem;"><h4 id="messagetext" style="color: red;">New Message!</h4><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-left">' + date.toLocaleString() + '</span></div>'
+                            document.getElementById("htmltitle").innerHTML = json[i].user + ": " + json[i].message
+                        } else {
+                            renderhtml += '<div class="container"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-left">' + date.toLocaleString() + '</span></div>'
+                        }
                     }
-                    messages.innerHTML = renderhtml
+
+                }
+                if (number == 0) {
+                    messages.innerHTML = renderhtml; try {
+                        document.getElementById('newmessage').scrollIntoView({
+                            behavior: !firstLoad ? "smooth" : undefined
+                        });
+                    }
+                    catch (err) {
+                    }
+                    curentupdatenumber = updatenumber
+                } else if (renderhtml != "") {
+                    document.getElementById("newmessage").removeAttribute("style")
+                    document.getElementById("newmessage").removeAttribute("id")
+                    try {
+                        document.getElementById("messagetext").remove()
+                    }
+                    catch (err) {
+                    }
+                    messages.innerHTML += renderhtml
                     try {
                         document.getElementById('newmessage').scrollIntoView({
                             behavior: !firstLoad ? "smooth" : undefined
@@ -399,41 +423,60 @@
                     }
                     catch (err) {
                     }
-                    curentjson = json
-                    curentupdatenumber = updatenumber
                 }
-                firstLoad = false
+                if (curentupdatenumber != updatenumber) {
+                    updatemessages(0)
+                }
+                curentjson = json
             }
+            firstLoad = false
 
-            catch (err) {
-                const messages = document.getElementById("chatdiv")
-                if (messages.innerHTML != curentjson) {
-                    messages.innerHTML = document.getElementById("loadingscreen").innerHTML
-                    curentjson = document.getElementById("loadingscreen").innerHTML;
-                }
-                firstLoad = true
-            }
         }
 
         const sendtypingmessage = async () => {
+            if (document.getElementById("chatbox").value != document.getElementById("chatbox").value.split(":)").join("🙂").split(":(").join("😔").split("(:").join("🙂").split("):").join("😔").split("XD").join("😂").split(":D").join("😃")) { document.getElementById("chatbox").value = document.getElementById("chatbox").value.split(":)").join("🙂").split(":(").join("😔").split("(:").join("🙂").split("):").join("😔").split("XD").join("😂").split(":D").join("😃") }
             const response = await fetch("/privatemessage/starttyping?user={{chatuser}}")
         }
 
         const sendChat = async (e) => {
             e.preventDefault();
             if (e.target.elements[0].value != "") {
-                const value = e.target.elements[0].value
-                e.target.elements[0].value = ""
-                const sendmessage = await fetch("/privatemessage/message?user={{chatuser}}", {
-                    method: "POST", headers: {
-                        'Content-Type': 'application/json'
-                    }, body: JSON.stringify({ message: value })
-                })
-                const message_response = await sendmessage.text()
-                if (message_response != "true") {
-                    alert(message_response);
+                value = e.target.elements[0].value.split(":)").join("🙂").split(":(").join("😔").split("(:").join("🙂").split("):").join("😔").split("XD").join("😂").split(":D").join("😃")
+                if (navigator.onLine) {
+                    document.getElementById("newmessage").removeAttribute("style")
+                    document.getElementById("newmessage").removeAttribute("id")
+                    try {
+                        document.getElementById("messagetext").remove()
+                    }
+                    catch (err) {
+                    }
+                    date = new Date()
+                    document.getElementById("chatdiv").innerHTML += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>ME</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + value + '</p></p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fa fa-ellipsis-h"></i></span></div>'
+                    document.getElementById('newmessage').scrollIntoView({
+                        behavior: !firstLoad ? "smooth" : undefined
+                    });
+                    e.target.elements[0].value = ""
+                    const sendmessage = await fetch("/privatemessage/message?user={{chatuser}}", {
+                        method: "POST", headers: {
+                            'Content-Type': 'application/json'
+                        }, body: JSON.stringify({ message: value })
+                    })
+                    document.getElementById("newmessage").remove()
+                    date = new Date(); document.getElementById("chatdiv").innerHTML += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>ME</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + value + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
+                    const message_response = await sendmessage.text()
+                    if (message_response != "true") {
+                        shownotification(message_response, "#newmessage")
+                    }
+                    updatemessages(0);
+                } else {
+                    shownotification("<b style='color: rgb(189, 2, 2); -webkit-text-stroke: 0.5px white'>message failed to send!</b>", "#newmessage")
+                    document.getElementById("newmessage").removeAttribute("style")
+                    document.getElementById("newmessage").removeAttribute("id")
+                    date = new Date(); document.getElementById("chatdiv").innerHTML += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>ME</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + value + '</p></p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: darkred;"><i class="fas fa-exclamation-circle"></i></span></div>'
+                    document.getElementById('newmessage').scrollIntoView({
+                        behavior: !firstLoad ? "smooth" : undefined
+                    }); e.target.elements[0].value = ""
                 }
-                updatemessages(1);
             }
         }
         updatemessages(0);
@@ -454,8 +497,7 @@
         setInterval(istyping, 1000);
     </script>
     <script>
-        const updatemessages = async () => {
-            getlikes()
+        const checklogin = async () => {
             const response = await fetch("/checklogin")
             const text = await response.text()
 
@@ -463,8 +505,8 @@
                 location.replace("/login")
             }
         }
-        updatemessages()
-        setInterval(updatemessages, 5000);
+        checklogin()
+        setInterval(checklogin, 5000);
     </script>
 </head>
 
@@ -474,9 +516,6 @@
         <li><a class="active" href="/recommended">Home</a></li>
         <li><a onclick="window.history.back();">Go Back</a></li>
         <li>
-            <p style="color: white; text-align: center;padding: 0px 16px;"><b>Powered by BeefChat</b></p>
-        </li>
-        <li>
             <p style="color: white; text-align: center;padding: 0px 16px;">{{chatuser}}</p>
         </li>
         <li id="typingmessage" class="hide">
@@ -484,19 +523,7 @@
         </li>
 
     </ul>
-    <div id="chatdiv" style="margin-top: 11rem;">
-        <div class="loading">
-            <div class="obj"></div>
-            <div class="obj"></div>
-            <div class="obj"></div>
-            <div class="obj"></div>
-            <div class="obj"></div>
-            <div class="obj"></div>
-            <div class="obj"></div>
-            <div class="obj"></div>
-        </div>
-    </div>
-    <div style="display: none;" id="loadingscreen">
+    <div id="chatdiv" style="margin-top: 10.5rem;">
         <div class="loading">
             <div class="obj"></div>
             <div class="obj"></div>
@@ -511,7 +538,7 @@
     <div style="bottom: 0;">
         <div id="chatbar">
             <form onsubmit="sendChat(event)">
-                <input type="text" id="chatbox" placeholder="Message..." oninput="sendtypingmessage()" />
+                <input type="text" id="chatbox" placeholder="Message..." oninput="sendtypingmessage()" disabled />
             </form>
         </div>
     </div>

@@ -126,7 +126,7 @@ def addtoalreadyuploaded(filename):
 def home():
     if request.user_agent.platform == "windows":
         return render_template("quickskitsindex.html")
-    return redirect("/latest")
+    return redirect("/recommended")
 
 
 @app.route("/recommended")
@@ -191,12 +191,12 @@ def signup():
 @app.route("/watch/<path:videoid>")
 def watch(videoid):
     if request.user_agent.platform == "windows":
-        return render_template("quickskitsindex.html")
+        return redirect("/share/"+videoid)
     if 'token' not in request.cookies:
-        return redirect("/login")
+        return redirect("/share/"+videoid)
     else:
         if logindatabase.checktoken(request.cookies["token"]) == False:
-            return redirect("/login")
+            return redirect("/share/"+videoid)
     return render_template("watchvideo.html", videoid=videoid)
 
 
@@ -258,7 +258,7 @@ def templates(files):
 @app.route("/checklogin")
 def checklogin():
     if request.user_agent.platform == "windows":
-        return render_template("quickskitsindex.html")
+        return "false"
     if 'token' not in request.cookies:
         return "false"
     elif logindatabase.checktoken(request.cookies["token"]) == False:
@@ -283,9 +283,40 @@ def userprofile():
         return render_template("quickskitsindex.html")
     userinfo = logindatabase.getuserinfofromusername(user)
     if userinfo != False:
-        return render_template("profile.html", username=user, usernamedash=user.replace(" ", "-"))
+        return render_template("profile.html", username=userinfo["user"], usernamedash=userinfo["user"].replace(" ", "-"))
     else:
         return "the user '"+user+"' could not be found on our servers."
+
+
+@app.route("/profile")
+def myprofile():
+    if 'token' not in request.cookies:
+        return redirect("/login")
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return redirect("/login")
+    if request.user_agent.platform == "windows":
+        return render_template("quickskitsindex.html")
+    userinfo = logindatabase.checktoken(request.cookies["token"])
+    if userinfo != False:
+        return render_template("profile.html", username=userinfo["user"], usernamedash=userinfo["user"].replace(" ", "-"))
+    else:
+        return redirect("/login")
+
+
+@app.route("/user/getcontacts")
+def getcontacts():
+    if 'token' not in request.cookies:
+        return "false"
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return "false"
+    if request.user_agent.platform == "windows":
+        return render_template("quickskitsindex.html")
+    userinfo = logindatabase.checktoken(request.cookies["token"])
+    allcontacts = privatemessages.allcontacts(userinfo, logindatabase)
+    if userinfo != False and allcontacts != []:
+        return jsonify(allcontacts)
+    else:
+        return jsonify([{"src": "#", "user": "Quickskits Team", "status": "Welcome to quickskits!"}])
 
 
 @app.route("/user/getvideos")
@@ -311,20 +342,80 @@ def userprofilejson():
 
 @app.route("/getjson/<path:video>/<path:number>")
 def getjsonlatest(video, number):
-    if request.user_agent.platform == "windows":
-        return render_template("quickskitsindex.html")
     if 'token' not in request.cookies:
-        return redirect("/login")
-    else:
-        if logindatabase.checktoken(request.cookies["token"]) == False:
-            return redirect("/login")
+        if video == "video":
+            videox = 0
+            for video in lastvideo:
+                if video["videoid"] == number:
+                    userinfo = logindatabase.getuserinfofromuuid(
+                        lastvideo[int(videox)]["uuid"])
+                    video = {}
+                    video["src"] = lastvideo[int(videox)]["src"]
+                    video["title"] = lastvideo[int(videox)]["title"]
+                    video["description"] = lastvideo[int(
+                        videox)]["description"]
+                    video["stretch"] = lastvideo[int(videox)]["stretch"]
+                    video["videoid"] = lastvideo[int(videox)]["videoid"]
+                    video["views"] = millify(lastvideo[int(videox)]["views"])
+                    video["videoliked"] = "false"
+                    video["likes"] = len(lastvideo[int(videox)]["likedlist"])
+                    video["username"] = userinfo["user"]
+                    return jsonify(video)
+                videox += 1
+            return jsonify(
+                {
+                    "src": "/videos/endofquickskits",
+                    "title": "404 ERROR",
+                    "description": "VIDEO NOT FOUND!",
+                    "stretch": 0,
+                    "username": "quickskits error",
+                    "videoid": "error",
+                    "videoliked": "false",
+                    "likes": 0,
+                }
+            )
+        else:
+            return "unknown request", 404
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        if video == "video":
+            videox = 0
+            for video in lastvideo:
+                if video["videoid"] == number:
+                    userinfo = logindatabase.getuserinfofromuuid(
+                        lastvideo[int(videox)]["uuid"])
+                    video = {}
+                    video["src"] = lastvideo[int(videox)]["src"]
+                    video["title"] = lastvideo[int(videox)]["title"]
+                    video["description"] = lastvideo[int(
+                        videox)]["description"]
+                    video["stretch"] = lastvideo[int(videox)]["stretch"]
+                    video["videoid"] = lastvideo[int(videox)]["videoid"]
+                    video["views"] = millify(lastvideo[int(videox)]["views"])
+                    video["videoliked"] = "false"
+                    video["likes"] = len(lastvideo[int(videox)]["likedlist"])
+                    video["username"] = userinfo["user"]
+                    return jsonify(video)
+                videox += 1
+            return jsonify(
+                {
+                    "src": "/videos/endofquickskits",
+                    "title": "404 ERROR",
+                    "description": "VIDEO NOT FOUND!",
+                    "stretch": 0,
+                    "username": "quickskits error",
+                    "videoid": "error",
+                    "videoliked": "false",
+                    "likes": 0,
+                }
+            )
+        else:
+            return "unknown request", 404
     if video == "latest":
         viewerinfo = logindatabase.checktoken(request.cookies["token"])
         finishedvideo = []
         for latestvideo in lastvideo:
             userinfo = logindatabase.getuserinfofromuuid(
                 latestvideo["uuid"])
-            print(userinfo)
             video = {}
             video["src"] = latestvideo["src"]
             video["title"] = latestvideo["title"]
@@ -338,7 +429,6 @@ def getjsonlatest(video, number):
             video["likes"] = len(latestvideo["likedlist"])
             video["username"] = userinfo["user"]
             finishedvideo.append(video)
-        print(video)
         return jsonify(finishedvideo)
     elif video == "video":
         viewerinfo = logindatabase.checktoken(request.cookies["token"])
@@ -365,11 +455,10 @@ def getjsonlatest(video, number):
         return jsonify(
             {
                 "src": "/videos/endofquickskits",
-                "title": "quickskits",
-                "description": "you have found the end of quickskits, well done!",
+                "title": "404 ERROR",
+                "description": "VIDEO NOT FOUND!",
                 "stretch": 0,
-                "views": "0",
-                "username": "quickskits",
+                "username": "quickskits error",
                 "videoid": "error",
                 "videoliked": "false",
                 "likes": 0,
@@ -401,10 +490,10 @@ def getjsonlatest(video, number):
             return jsonify(
                 {
                     "src": "/videos/endofquickskits",
-                    "title": "quickskits",
-                    "description": "you have found the end of quickskits, well done!",
+                    "title": "404 ERROR",
+                    "description": "VIDEO NOT FOUND!",
                     "stretch": 0,
-                    "username": "quickskits",
+                    "username": "quickskits error",
                     "videoid": "error",
                     "videoliked": "false",
                     "likes": 0,
@@ -416,16 +505,16 @@ def getjsonlatest(video, number):
 
 @app.route("/likebutton/<path:likeunlike>/<path:videoid>")
 def like(videoid, likeunlike):
-    if request.user_agent.platform == "windows":
-        return render_template("quickskitsindex.html")
-    if 'token' not in request.cookies:
-        return redirect("/login")
-    else:
-        if logindatabase.checktoken(request.cookies["token"]) == False:
-            return redirect("/login")
     if videoid != "error":
-        userinfo = logindatabase.checktoken(request.cookies["token"])
         if likeunlike == "like":
+            if request.user_agent.platform == "windows":
+                return render_template("quickskitsindex.html")
+            if 'token' not in request.cookies:
+                return redirect("/login")
+            else:
+                if logindatabase.checktoken(request.cookies["token"]) == False:
+                    return redirect("/login")
+            userinfo = logindatabase.checktoken(request.cookies["token"])
             for video in lastvideo:
                 if video["videoid"] == videoid:
                     video["likedlist"].append(userinfo["uuid"])
@@ -433,6 +522,14 @@ def like(videoid, likeunlike):
                         __file__), "videos/lastvideos.json"), "w").write(json.dumps(lastvideo))
                     return "true"
         elif likeunlike == "unlike":
+            if request.user_agent.platform == "windows":
+                return render_template("quickskitsindex.html")
+            if 'token' not in request.cookies:
+                return redirect("/login")
+            else:
+                if logindatabase.checktoken(request.cookies["token"]) == False:
+                    return redirect("/login")
+            userinfo = logindatabase.checktoken(request.cookies["token"])
             for video in lastvideo:
                 if video["videoid"] == videoid:
                     if userinfo["uuid"] in video["likedlist"]:
@@ -477,13 +574,19 @@ def views(videoid):
             return "false"
 
 
+@app.route("/share/<path:videoid>")
+def sharevideo(videoid):
+    if request.user_agent.platform == "windows":
+        return render_template("sharevideo.html", videoid=videoid)
+    if 'token' not in request.cookies:
+        return render_template("sharevideo.html", videoid=videoid)
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return render_template("sharevideo.html", videoid=videoid)
+    return redirect("/watch/"+videoid)
+
+
 @app.route("/videos/<path:video>")
 def send_video(video):
-    if 'token' not in request.cookies:
-        return redirect("/login")
-    else:
-        if logindatabase.checktoken(request.cookies["token"]) == False:
-            return redirect("/login")
     global lastvideo
     try:
         return send_from_directory("videos", video)
@@ -684,7 +787,7 @@ def privatem():
             else:
                 return render_template("server message.html", messagetitle="Error", message="that user doesnt exist.")
         else:
-            return render_template("server message.html", messagetitle="Error", message="you cant chat to yourself silly.")
+            return render_template("getallchats.html", username=requestuserdata["user"])
 
 
 @app.route("/privatemessage/<path:number>/getjson")
@@ -701,7 +804,7 @@ def privatemj(number):
         userdata = logindatabase.checktoken(request.cookies["token"])
         if requestuserdata != userdata:
             if requestuserdata != False:
-                return jsonify(privatemessages.getchat(requestuserdata, userdata, number))
+                return jsonify(privatemessages.getchat(requestuserdata, userdata, number=number))
             else:
                 return "that user doesnt exist."
         else:
@@ -773,7 +876,220 @@ def istype():
         else:
             return "you cant chat to yourself silly."
 
+## API ##
+
+
+@app.route("/api/<path:apipath>", methods=["POST"])
+def apilogin(apipath):
+    if apipath != "login" and logindatabase.checktoken(request.form.get("token", "")) == False:
+        return jsonify({"error": "invalid token"})
+    if apipath == "login":
+        loginresponse = logindatabase.login(
+            request.form.get("u", ""),  request.form.get("p", ""))
+        if "token" in loginresponse:
+            return jsonify({"token": loginresponse["token"]})
+        else:
+            return jsonify({"error": "invalid login"})
+
+    elif apipath == "upload":
+        try:
+            userdata = logindatabase.checktoken(
+                request.form.get("token", ""))
+            global lastvideo
+            videoid = randstr(30)
+            files = request.files.getlist("file")
+            portat = request.form["portat"]
+            music = request.form["music"]
+            if music == "n":
+                music = False
+            mixer = int(request.form["mixer"])
+            print(files)
+            print(len(files))
+            if len(files) == 1:
+                f = files[0]
+                filename, file_extension = os.path.splitext(f.filename)
+                savedir = randstr(10) + file_extension
+                if checkalreadyuploaded(savedir):
+                    return jsonify({"error": "this video has already been uploaded try a different one."})
+                else:
+                    f.save("temp/" + savedir)
+                    addtoalreadyuploaded(f.filename)
+                    boomerrang = boomerang(
+                        "temp/"+savedir, "videogif/", portat)
+                    newfile = render.render(
+                        savedir, "temp/", portat=portat, music=music, mixer=mixer)
+                    try:
+                        os.remove("temp/" + savedir)
+                    except:
+                        pass
+                    if newfile != False:
+                        conpressedversion = vidcompressor.compress(
+                            10000000, newfile, dirs="temp/", savedir="videos/"
+                        )
+                        try:
+                            os.remove("temp/" + newfile)
+                        except:
+                            pass
+                        portatsize = render.getportat(
+                            "videos/" + conpressedversion)
+                        print(portatsize)
+                        if portat == "portat":
+                            finisheddic = {
+                                "src": "/videos/" + conpressedversion,
+                                "title": bleach.clean(request.form["title"]),
+                                "description": bleach.clean(
+                                    request.form["description"]
+                                ),
+                                "boomerrang": "/boomerrang/"+boomerrang,
+                                "stretch": 1,
+                                "uuid": userdata["uuid"],
+                                "videoid": videoid,
+                                "likedlist": [],
+                                "views": 0,
+                            }
+                        else:
+                            finisheddic = {
+                                "src": "/videos/" + conpressedversion,
+                                "title": bleach.clean(request.form["title"]),
+                                "description": bleach.clean(
+                                    request.form.get("description", "")
+                                ),
+                                "boomerrang": "/boomerrang/"+boomerrang,
+                                "stretch": 0,
+                                "uuid": userdata["uuid"],
+                                "videoid": videoid,
+                                "likedlist": [],
+                                "views": 0,
+                            }
+
+                        lastvideo.insert(0, finisheddic)
+                        open(os.path.join(os.path.dirname(
+                            __file__), "videos/lastvideos.json"), "w").write(json.dumps(lastvideo))
+                        return jsonify({"OK": True, "path": "/watch/"+videoid})
+                    else:
+                        return jsonify({"error": "the video was too long please upload a shorter one."})
+            else:
+                allfiles = []
+                totallen = 0
+                for f in files:
+                    filename, file_extension = os.path.splitext(f.filename)
+                    savedir = randstr(10) + file_extension
+                    f.save("temp/" + savedir)
+                    addtoalreadyuploaded(f.filename)
+                    allfiles.append(savedir)
+                    totallen += render.getlength("temp/" + savedir)
+                if totallen <= 120:
+                    print(allfiles)
+                    boomerrang = boomerang(
+                        "temp/"+savedir, "videogif/", portat)
+                    newfile = render.renderMultiple(
+                        allfiles, "temp/", portat=portat, music=music, mixer=mixer)
+                    try:
+                        os.remove("temp/" + savedirs)
+                    except:
+                        pass
+                    conpressedversion = vidcompressor.compress(
+                        10000000, newfile, dirs="temp/", savedir="videos/"
+                    )
+                    try:
+                        os.remove(conpressedversion)
+                    except:
+                        pass
+                    if portat == "portat":
+                        finisheddic = {
+                            "src": "/videos/" + conpressedversion,
+                            "title": bleach.clean(request.form["title"]),
+                            "description": bleach.clean(request.form["description"]),
+                            "boomerrang": "/boomerrang/"+boomerrang,
+                            "stretch": 1,
+                            "uuid": userdata["uuid"],
+                            "videoid": videoid,
+                            "likedlist": [],
+                            "views": 0,
+                        }
+                    else:
+                        finisheddic = {
+                            "src": "/videos/" + conpressedversion,
+                            "title": bleach.clean(request.form["title"]),
+                            "description": bleach.clean(request.form["description"]),
+                            "boomerrang": "/boomerrang/"+boomerrang,
+                            "stretch": 0,
+                            "uuid": userdata["uuid"],
+                            "videoid": videoid,
+                            "likedlist": [],
+                            "views": 0,
+                        }
+                    lastvideo.insert(0, finisheddic)
+                    open(os.path.join(os.path.dirname(
+                        __file__), "videos/lastvideos.json"), "w").write(json.dumps(lastvideo))
+                    return jsonify({"OK": True, "path": "/watch/"+videoid})
+                else:
+                    return jsonify({"error": "the video was too long please upload a shorter one."})
+        except Exception as e:
+            errorlog.insert(0, {"uuid": userdata["uuid"], "error": str(e)})
+            open(os.path.join(os.path.dirname(
+                __file__), "error.log"), "w").write(json.dumps(errorlog))
+            print(str(e))
+            return jsonify({"error": "there was an Error when uploading the video. either the video was corrupt or there was another issue. this error has been logged into our error.log file for futher investigation into this error."})
+    elif apipath == "recommended":
+        viewerinfo = logindatabase.checktoken(request.form.get("token", ""))
+        recommendedvideos = videoai.getrecommended(viewerinfo, lastvideo)
+        finishedvideo = []
+        for recommendedvideo in recommendedvideos:
+            userinfo = logindatabase.getuserinfofromuuid(
+                recommendedvideo["uuid"])
+            video = {}
+            video["src"] = recommendedvideo["src"]
+            video["title"] = recommendedvideo["title"]
+            video["description"] = recommendedvideo["description"]
+            video["stretch"] = recommendedvideo["stretch"]
+            video["videoid"] = recommendedvideo["videoid"]
+            video["views"] = millify(recommendedvideo["views"])
+            video["videoliked"] = "false"
+            if viewerinfo["uuid"] in recommendedvideo["likedlist"]:
+                video["videoliked"] = "true"
+            video["likes"] = len(recommendedvideo["likedlist"])
+            video["username"] = userinfo["user"]
+            finishedvideo.append(video)
+        return jsonify({"OK": True, "recommended": finishedvideo})
+    elif apipath == "getchat":
+        user = request.form["user"]
+        requestuserdata = logindatabase.getuserinfofromusername(user)
+        userdata = logindatabase.checktoken(request.form["token"])
+        if requestuserdata != userdata:
+            if requestuserdata != False:
+                return jsonify({"r": privatemessages.getchat(requestuserdata, userdata)})
+            else:
+                return jsonify({"error": "that user doesnt exist."})
+        else:
+            return jsonify({"error": "you cant chat to yourself silly."})
+    elif apipath == "message":
+        user = request.form["user"]
+        requestuserdata = logindatabase.getuserinfofromusername(user)
+        userdata = logindatabase.checktoken(request.form["token"])
+        message = request.form["message"]
+        if requestuserdata != userdata:
+            if message == "":
+                return jsonify({"r": True})
+            if requestuserdata != False:
+                logindatabase.addnotification(requestuserdata["uuid"], {"new": True, "user": userdata["user"], "info": bleach.clean(
+                    message), "link": "/privatemessage/?user="+userdata["user"].replace(" ", "-")})
+                if privatemessages.addmessage(requestuserdata, userdata, message) == "true":
+                    return jsonify({"r": True})
+                else:
+                    return jsonify({"r": False, "error": "there was an error!"})
+            else:
+                return jsonify({"r": False, "error": "user doesn't exist!"})
+        else:
+            return jsonify({"r": False, "error": "You can't message yourself!"})
+
+## Error Handlers ##
+@app.errorhandler(404)
+def page_not_found(error):
+    app.logger.error('Page not found: %s', (request.path))
+    return render_template("404.html"), 404
+
 
 ## Start Up ##
 print("quickskits booted up.")
-app.run(debug=True, host="0.0.0.0", port=4141)
+app.run(debug=False, host="0.0.0.0", port=4141)

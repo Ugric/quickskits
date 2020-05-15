@@ -1,0 +1,179 @@
+<html>
+
+<head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <style>
+        /* Center the loader */
+        #loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 1;
+            margin: -75px 0 0 -75px;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 100px;
+            height: 100px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Add animation to "page content" */
+        .animate-bottom {
+            position: relative;
+            -webkit-animation-name: animatebottom;
+            -webkit-animation-duration: 1s;
+            animation-name: animatebottom;
+            animation-duration: 1s
+        }
+
+        @-webkit-keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0
+            }
+
+            to {
+                bottom: 0px;
+                opacity: 1
+            }
+        }
+
+        @keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0
+            }
+
+            to {
+                bottom: 0;
+                opacity: 1
+            }
+        }
+
+        #myDiv {
+            display: none;
+            text-align: center;
+        }
+
+        .hide {
+            display: none;
+            transition: 1s;
+        }
+    </style>
+    <style>
+        html,
+        body {
+            position: relative;
+            height: 100%;
+            background-color: black;
+            color: white;
+            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swiper-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            text-align: center;
+            font-size: 18px;
+
+            /* Center slide text vertically */
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+        }
+    </style>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script>
+        const updatemessages = async () => {
+            const response = await fetch("/checklogin")
+            const text = await response.text()
+
+            if (text != "true") {
+                location.replace("/login")
+            }
+        }
+        updatemessages()
+        setInterval(updatemessages, 5000);
+    </script>
+</head>
+
+<body>
+    <div style="position: -webkit-sticky; position: sticky; top: 0;">
+        <div
+            style="background-color: white; color: black; padding: 1rem; padding-left: 1rem; border-bottom-right-radius: 100%; width: 75%;">
+            <h1>contacts:</h1>
+        </div>
+        <a onclick="window.history.back()"><img height=49px src="/serverimagedata/forward.png"
+                style=" display: block; bottom: 10px;background-color: white; border-radius: 100%; margin: 1rem;"></a>
+    </div>
+    <div id="loading">
+        <div id="loader"></div>
+    </div>
+    <hr>
+    <div id="videolist"></div>
+    <script>
+        const getvideolist = async () => {
+            const response = await fetch("/user/getcontacts")
+            const json = await response.json()
+            var text = "";
+            var i;
+            for (i = 0; i < json.length; i++) {
+                text += "<a style='margin-left: 1rem; color: white; text-decoration: none;' href='" + json[i].src + "'><b>" + json[i].user + " | " + json[i].status + "</b></a><hr>"
+            }
+            console.log(text)
+            document.getElementById("videolist").innerHTML = text;
+            $("#loading").addClass("hide")
+        }
+        getvideolist()
+        setInterval(getvideolist, 1000);
+    </script>
+</body>
+
+</html>

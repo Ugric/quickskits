@@ -13,7 +13,8 @@ class loginBaseSetup:
         try:
             self.loginbase = json.load(open(os.path.join(os.path.dirname(
                 __file__), self.loginstoredname+".json"), "r"))
-        except:
+        except Exception as e:
+            print(str(e))
             open(os.path.join(os.path.dirname(
                 __file__), self.loginstoredname+".json"), "w").write("[]")
             self.loginbase = []
@@ -50,20 +51,23 @@ class loginBaseSetup:
         for user in self.loginbase:
             if user["uuid"] == uuid:
                 if "notification" not in user:
-                    user["notification"] = {"new": False}
+                    user["notification"] = []
                     open(os.path.join(os.path.dirname(
                         __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
-                jsonnotification = user["notification"]
-                if user["notification"]["new"] == True:
-                    jsonnotification["new"] = True
-                    user["notification"] = {"new": False}
-                return jsonnotification
+                if user["notification"] != []:
+                    jsonnotification = user["notification"][0]
+                    if user["notification"][0]["new"] == True:
+                        jsonnotification["new"] = True
+                    user["notification"].remove(user["notification"][0])
+                    return jsonnotification
+                else:
+                    return {"new": False}
         return {"new": False}
 
     def addnotification(self, uuid, notificationjson):
         for user in self.loginbase:
             if user["uuid"] == uuid:
-                user["notification"] = notificationjson
+                user["notification"].append(notificationjson)
                 return True
         return False
 

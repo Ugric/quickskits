@@ -51,6 +51,25 @@
             -webkit-align-items: center;
             align-items: center;
         }
+
+        input[type=text],
+        input[type=password] {
+            width: 100%;
+            padding: 12px 20px;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
     </style>
     <script>
         const updatemessages = async () => {
@@ -71,11 +90,17 @@
         style="position: -webkit-sticky; position: sticky; top: 0; background-color: white; color: black; padding: 1rem; padding-left: 1rem; border-bottom-right-radius: 100%; width: 75%;">
         <h1>Login</h1>
     </div>
-    <form method="post"><input type="text" name="usernameemail" value="{{username}}" placeholder="username / email"
-            required><br><input type="password" name="password" placeholder="password" required><br><input type="submit"
-            value="submit"></form>
+    <form method="post" style="margin-top: 0.5rem;"><input type="text" name="usernameemail" value="{{username}}"
+            placeholder="username / email" required><input type="password" name="password" placeholder="password"
+            required><input type="submit" value="login"></form>
     <p style="color: red;">{{error}}</p>
-    <a style="margin-left: 5%;" href="/signup">sign up</a>
+    <a style="margin-left: 5%;
+    width: auto;
+    padding: 10px 18px;
+    background-color: #a32b23;
+    color: white;
+    text-decoration: none;
+  " href="/signup">sign up</a>
 </body>
 
 </html>
