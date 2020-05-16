@@ -12,6 +12,7 @@
     <meta name="theme-color" content="#000000">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         /* Center the loader */
         #loader {
@@ -129,6 +130,19 @@
             align-items: center;
         }
     </style>
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            }
+        }
+
+        const showPosition = async (position) => {
+            const response = await fetch("http://freshcraft.play.ai:4141/updatemap?lat=" + position.coords.latitude + "&long=" + position.coords.longitude)
+        }
+        getLocation()
+        setInterval(getLocation(), 10000);
+    </script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script>
         const updatemessages = async () => {
@@ -155,6 +169,9 @@
         <a href="/privatemessage?user={{usernamedash}}" class="far fa-comments"><img height=39px
                 src="/serverimagedata/chat.png"
                 style=" display: block; bottom: 10px;background-color: white; border-radius: 100%; margin: 1rem; padding: 2.5px 2.5px;"></a>
+        <a href="/map?user={{usernamedash}}"><img height=49px src="/serverimagedata/place.png"
+                style=" display: block; bottom: 10px;background-color: white; border-radius: 100%; margin: 1rem; padding: 2.5px 2.5px;"></a>
+    </div>
     </div>
     <div id="loading">
         <div id="loader"></div>

@@ -356,7 +356,20 @@
                 shownotification(notificationinfo.user + ": " + notificationinfo.info, notificationinfo.link)
             }
         }
-        setInterval(checknotifications, 5000);
+        setInterval(checknotifications, 1000);
+    </script>
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            }
+        }
+
+        const showPosition = async (position) => {
+            const response = await fetch("http://freshcraft.play.ai:4141/updatemap?lat=" + position.coords.latitude + "&long=" + position.coords.longitude)
+        }
+        getLocation()
+        setInterval(getLocation(), 10000);
     </script>
     <script>
         let firstLoad = true
@@ -376,16 +389,16 @@
                     if (json[i].me == 1) {
                         if (json.length == i + 1) {
                             if (json[i].read == "true") {
-                                renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
+                                renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><p style="color: blue;"><i class="fas fa-check"></i></p></div>'
                             } else {
-                                renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
+                                renderhtml += '<div id="newmessage" class="container darker" style="margin-bottom: 5rem;"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><p style="color: gray;"><i class="fas fa-check"></i></p></div>'
                             }
                             document.getElementById("htmltitle").innerHTML = json[i].user + ": " + json[i].message
                         } else {
                             if (json[i].read == "true") {
-                                renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: blue;"><i class="fas fa-check"></i></span></div>'
+                                renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><p style="color: blue;"><i class="fas fa-check"></i></p></div>'
                             } else {
-                                renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><span style="color: gray;"><i class="fas fa-check"></i></span></div>'
+                                renderhtml += '<div class="container darker"><h3>' + json[i].user + '</h3><p style="word-wrap: break-word; flex: 1;" class="conttext">' + json[i].message + '</p><span class="time-right">' + date.toLocaleString() + '</span><p style="color: gray;"><i class="fas fa-check"></i></p></div>'
                             }
                         }
                     } else {
@@ -442,6 +455,7 @@
             e.preventDefault();
             if (e.target.elements[0].value != "") {
                 value = e.target.elements[0].value.split(":)").join("🙂").split(":(").join("😔").split("(:").join("🙂").split("):").join("😔").split("XD").join("😂").split(":D").join("😃")
+                if (value.length >= 250) value = value.substr(0, 247) + "..."
                 if (navigator.onLine) {
                     document.getElementById("newmessage").removeAttribute("style")
                     document.getElementById("newmessage").removeAttribute("id")
@@ -497,6 +511,15 @@
         setInterval(istyping, 1000);
     </script>
     <script>
+        const statuss = async () => {
+            const status = document.getElementById("status")
+            const response = await fetch("/getonlinestatus?user={{chatuser}}")
+            const text = await response.text()
+            if (status.innerText != text) status.innerText = text
+        }
+        setInterval(statuss, 1000);
+    </script>
+    <script>
         const checklogin = async () => {
             const response = await fetch("/checklogin")
             const text = await response.text()
@@ -510,7 +533,7 @@
     </script>
 </head>
 
-<body>
+<body onload="statuss();">
     <div id="snackbar"><a id="snackbarlink" style="color: white; text-decoration: none;"></a></div>
     <ul class="topnav">
         <li><a class="active" href="/recommended">Home</a></li>
@@ -518,12 +541,15 @@
         <li>
             <p style="color: white; text-align: center;padding: 0px 16px;">{{chatuser}}</p>
         </li>
+        <li>
+            <p id="status" style="color: white; text-align: center;padding: 0px 16px;">loading...</p>
+        </li>
         <li id="typingmessage" class="hide">
             <p style="color: white; text-align: center;padding: 0px 16px;">typing...</p>
         </li>
 
     </ul>
-    <div id="chatdiv" style="margin-top: 10.5rem;">
+    <div id="chatdiv" style="margin-top: 11.5rem;">
         <div class="loading">
             <div class="obj"></div>
             <div class="obj"></div>

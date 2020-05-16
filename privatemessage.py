@@ -21,7 +21,7 @@ def change_links(message):
         uriget = urlparse(url)
         output = output.replace(
             url,
-            f"<a href='{url}' target='_blank'>{'{uri.netloc}{uri.path}'.format(uri=uriget)}</a>",
+            f"<a href='{url}'>{'{uri.netloc}{uri.path}'.format(uri=uriget)}</a>",
         )
     """for url in chats:
         uriget = urlparse(url)
@@ -117,15 +117,15 @@ class startchats:
                             if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
                                 finished = 1
                                 output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(
-                                    user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                                    user["user"]).replace(" ", "-"), "status": "0 messages"})
                                 break
                             i += 1
                         if finished == 0:
                             output.append(
-                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages"})
                     else:
                         output.append(
-                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages"})
                 elif chat["messages"][-1]["read"] != "false" and chat["messages"][-1]["uuid"] == userinfo["uuid"]:
                     if output != []:
                         finished = 0
@@ -206,15 +206,15 @@ class startchats:
                             if chat["messages"][-1]["timestamp"] >= contact["timestamp"]:
                                 finished = 1
                                 output.insert(i-1, {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(
-                                    " ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                                    " ", "-"), "status": "0 messages"})
                                 break
                             i += 1
                         if finished == 0:
                             output.append(
-                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                                {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages"})
                     else:
                         output.append(
-                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages", "timestamp": chat["messages"][-1]["timestamp"]})
+                            {"user": str(user["user"]), "src": "/privatemessage/?user=" + str(user["user"]).replace(" ", "-"), "status": "0 messages"})
                 elif chat["messages"][-1]["read"] != "false" and chat["messages"][-1]["uuid"] == userinfo["uuid"]:
                     if output != []:
                         finished = 0

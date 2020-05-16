@@ -5,6 +5,8 @@ import json
 from datetime import datetime
 import os
 import bleach
+import timeago
+timeago.format
 
 
 class loginBaseSetup:
@@ -113,6 +115,7 @@ class loginBaseSetup:
             tempjson["uuid"] = randstr(40)
             tempjson["token"] = randstr(30)
             tempjson["verified"] = 0
+            tempjson["location"] = {"lat": 0, "long": 0}
             tempjson["notifications"] = {"new": False}
             tempjson["timestamp"] = datetime.timestamp(datetime.now())
             tempjson["verificationkey"] = randstr(50)
@@ -142,8 +145,22 @@ class loginBaseSetup:
                     return {"failed": "you need to verify your account by your email. your account will be deleted after 1 hour of the account being made unless the account is verified."}
         return {"failed": "incorrect username / email or password."}
 
+    def updatelocation(self, uuid, json):
+        for login in self.loginbase:
+            if uuid == login["uuid"]:
+                login["location"] = json
+                return True
+        return False
+
     def checktoken(self, token):
         for login in self.loginbase:
             if login["token"] == token and login["verified"] == 1:
+                login["online"] = datetime.timestamp(datetime.now())
                 return login
+        return False
+
+    def getonline(self, username):
+        for login in self.loginbase:
+            if username == login["user"]:
+                return timeago.format(login["online"], datetime.timestamp(datetime.now()))
         return False

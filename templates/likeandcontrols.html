@@ -1,0 +1,48 @@
+<script>
+    let lasttap = 0
+    let timenow = 0
+    let taps = 0
+    var video = document.getElementById("myVideo");
+    var btn = document.getElementById("myBtn");
+    function pauseAndPlay() {
+        timenow = Date.now() / 1000
+        if (timenow - lasttap <= 0.25 && taps == 1) {
+            lasttap = timenow
+            taps = 0
+            setTimeout(function () {
+                let lasttap = 0
+                let timenow = 0
+                let taps = 0
+                dblike()
+
+
+            }, 250);
+        }
+        else {
+            lasttap = timenow
+            taps = 1
+            setTimeout(function () {
+                if (timenow - lasttap <= 0.25 && taps == 1) {
+                    taps = 0
+                    if (video.paused) {
+                        video.play();
+                        $(".pauseicon").addClass("hide");
+                        $(".content").removeClass("pause")
+                        $(".username").removeClass("pausea")
+                    } else {
+                        video.pause();
+                        $(".pauseicon").removeClass("hide");
+                        $(".content").addClass("pause")
+                        $(".username").addClass("pausea")
+                    }
+                }
+            }, 250);
+
+        }
+    }
+    function reverse() {
+        video.currentTime -= 5
+        go1()
+    }
+    function go1() { $("#back5").fadeIn(100).delay(500).fadeOut(100) }
+</script>

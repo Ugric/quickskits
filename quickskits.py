@@ -205,7 +205,7 @@ def login():
     if request.user_agent.platform == "windows":
         return render_template("quickskitsindex.html")
     if 'token' in request.cookies and logindatabase.checktoken(request.cookies["token"]) != False:
-        return redirect("/latest")
+        return redirect("/recommended")
     if request.method == "POST":
         loginresponse = logindatabase.login(
             request.form["usernameemail"], request.form["password"])
@@ -218,6 +218,28 @@ def login():
             return render_template("login.html",  username=request.form["usernameemail"], error=loginresponse["failed"])
     else:
         return render_template("login.html")
+
+
+@app.route("/map")
+def maps():
+    return render_template("quickmaps.html", user=request.args["user"].replace(" ", "-"))
+
+
+@app.route("/gps")
+def gps():
+    return render_template("maps.html")
+
+
+@app.route("/updatemap")
+def updatemap():
+    logindatabase.updatelocation(logindatabase.checktoken(request.cookies["token"])[
+                                 "uuid"], {"lat": request.args["lat"], "long": request.args["long"]})
+    return "true"
+
+
+@app.route("/quickmaps/get")
+def quickmapsget():
+    return jsonify(logindatabase.getuserinfofromusername(request.args["user"].replace("-", " "))["location"])
 
 
 @app.route("/logout")
@@ -286,6 +308,18 @@ def userprofile():
         return render_template("profile.html", username=userinfo["user"], usernamedash=userinfo["user"].replace(" ", "-"))
     else:
         return "the user '"+user+"' could not be found on our servers."
+
+
+@app.route("/getonlinestatus")
+def getstatus():
+    if 'token' not in request.cookies:
+        return redirect("/login")
+    elif logindatabase.checktoken(request.cookies["token"]) == False:
+        return redirect("/login")
+    user = request.args["user"].replace("-", " ")
+    if request.user_agent.platform == "windows":
+        return render_template("quickskitsindex.html")
+    return "last seen "+logindatabase.getonline(user)
 
 
 @app.route("/profile")
@@ -1092,4 +1126,4 @@ def page_not_found(error):
 
 ## Start Up ##
 print("quickskits booted up.")
-app.run(debug=False, host="0.0.0.0", port=4141)
+app.run(debug=True, host="0.0.0.0", port=4141)

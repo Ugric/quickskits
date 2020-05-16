@@ -1,0 +1,13 @@
+<script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        }
+    }
+
+    const showPosition = async (position) => {
+        const response = await fetch("http://freshcraft.play.ai:4141/updatemap?lat=" + position.coords.latitude + "&long=" + position.coords.longitude)
+    }
+    getLocation()
+    setInterval(getLocation(), 10000);
+</script>

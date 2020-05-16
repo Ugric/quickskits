@@ -1,0 +1,183 @@
+<html>
+
+<head>
+    <style id="stndz-style"></style>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="apple-touch-startup-image" href="/favicon/favicon-32x32.png">
+    <meta name="apple-mobile-web-app-title" content="QuickSkits">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <style>
+        body {
+            display: block;
+            margin: 0px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .holder {
+            position: relative;
+        }
+
+        .frame {
+            width: 100%;
+            height: 100%;
+            background blue;
+        }
+
+        .bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+        }
+    </style>
+    <style>
+        #snackbar {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: rgb(110, 110, 110);
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 30px;
+            font-size: 17px;
+        }
+
+        #snackbar.show {
+            visibility: visible;
+            -webkit-animation: fadein 1s, fadeout 1s 2.5s;
+            animation: fadein 1s, fadeout 1s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+
+            to {
+                top: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadein {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+
+            to {
+                top: 30px;
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes fadeout {
+            from {
+                top: 30px;
+                opacity: 1;
+            }
+
+            to {
+                top: 0;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                top: 30px;
+                opacity: 1;
+            }
+
+            to {
+                top: 0;
+                opacity: 0;
+            }
+        }
+    </style>
+    <script>
+        function shownotification(message, link) {
+            const x = document.getElementById("snackbar");
+            const notificationlink = document.getElementById("snackbarlink")
+            notificationlink.innerHTML = message
+            notificationlink.href = link
+            x.className = "show";
+            setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+        }
+        const checknotifications = async () => {
+            const response = await fetch("/checknotifications")
+            const notificationinfo = await response.json()
+            if (notificationinfo.new != false && notificationinfo.link != window.location.pathname + window.location.search) {
+                if (notificationinfo.info.length >= 15) notificationinfo.info = notificationinfo.info.substr(0, 15) + "..."
+                shownotification(notificationinfo.user + ": " + notificationinfo.info, notificationinfo.link)
+            }
+        }
+        setInterval(checknotifications, 1000);
+    </script>
+    <script>
+        const updatemessages = async () => {
+            const response = await fetch("/checklogin")
+            const text = await response.text()
+
+            if (text != "true") {
+                location.replace("/login")
+            }
+        }
+        updatemessages()
+        setInterval(updatemessages, 5000);
+    </script>
+</head>
+
+<body>
+    <div id="snackbar"><a id="snackbarlink" style="color: white; text-decoration: none;"></a></div>
+    <div class="holder">
+        <div id="map"></div>
+        <div class="bar"><a onclick="window.history.back()"><img height=49px src="/serverimagedata/forward.png"
+                    style=" display: block; bottom: 10px;background-color: rgb(223, 223, 223); border-radius: 100%; margin: 1rem;"></a>
+        </div>
+    </div>
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            }
+        }
+
+        const showPosition = async (position) => {
+            const response = await fetch("http://freshcraft.play.ai:4141/updatemap?lat=" + position.coords.latitude + "&long=" + position.coords.longitude)
+        }
+        getLocation()
+        setInterval(getLocation(), 10000);
+    </script>
+    <script>
+        oldjson = {}
+        const quickmapsget = async () => {
+            const response = await fetch("http://freshcraft.play.ai:4141/quickmaps/get?user=Ugric")
+            const json = await response.json()
+            console.log(oldjson.lag != json.lag || oldjson.long != json.long)
+            console.log(oldjson.lag != json.lag)
+            console.log(oldjson.long != json.long)
+            if (oldjson.lag != json.lag || oldjson.long != json.long) document.getElementById("map").innerHTML = '<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?q=' + json.lat + ', ' + json.long + '&z=14&amp;output=embed"></iframe>'; oldjson = json;
+        }
+        quickmapsget()
+        setInterval(quickmapsget, 10000);
+    </script>
+</body>
+
+</html>

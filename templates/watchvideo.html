@@ -454,6 +454,19 @@
         }
     </script>
     <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            }
+        }
+
+        const showPosition = async (position) => {
+            const response = await fetch("http://freshcraft.play.ai:4141/updatemap?lat=" + position.coords.latitude + "&long=" + position.coords.longitude)
+        }
+        getLocation()
+        setInterval(getLocation(), 10000);
+    </script>
+    <script>
         const updatemessages = async () => {
             getlikes()
             const response = await fetch("/checklogin")
@@ -516,7 +529,9 @@ background-color: transparent; outline: none;  border: none; font-size: 100px; t
                 margin-left: auto;
                 margin-right: auto;"></a>
             <a href="/upload" style="    border: none;
-        outline:none;"><img height=49px src="/serverimagedata/uploadbutton.png" style="  display: block;
+        outline:none;"><img height=49px
+                    src="http://s16.tiktokcdn.com/tiktok/falcon/_next/static/images/create-38e08fcedb8660d05e3c463376e49544.svg"
+                    style="  display: block;
             margin-left: auto;
             margin-right: auto;">
             </a><a onClick="getlatest('{{videoid}}')"><img height=49px src="/serverimagedata/refreshicon.png" style=" display: block;
@@ -544,6 +559,23 @@ background-color: transparent; outline: none;  border: none; font-size: 100px; t
         <div id="loader"></div>
     </div>
     </div>
+    <script>
+        var video = document.getElementById("myVideo");
+        function checkpause() {
+            if (video.paused) {
+                $(".pauseicon").removeClass("hide");
+                $(".content").addClass("pause")
+                $(".username").addClass("pausea")
+            } else {
+                $(".pauseicon").addClass("hide");
+                $(".content").removeClass("pause")
+                $(".username").removeClass("pausea")
+            }
+        }
+
+        checkpause()
+        setInterval(checkpause, 500);
+    </script>
     <script>
         var video = document.getElementById("myVideo");
         var btn = document.getElementById("myBtn");
