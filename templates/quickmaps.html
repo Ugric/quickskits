@@ -168,7 +168,7 @@
     <script>
         oldjson = {}
         const quickmapsget = async () => {
-            const response = await fetch("http://freshcraft.play.ai:4141/quickmaps/get?user=Ugric")
+            const response = await fetch("/quickmaps/get?user=Ugric")
             const json = await response.json()
             console.log(oldjson.lag != json.lag || oldjson.long != json.long)
             console.log(oldjson.lag != json.lag)
