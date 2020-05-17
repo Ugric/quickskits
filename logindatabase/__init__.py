@@ -14,11 +14,11 @@ class loginBaseSetup:
         self.loginstoredname = loginstoredname
         try:
             self.loginbase = json.load(open(os.path.join(os.path.dirname(
-                __file__), self.loginstoredname+".json"), "r"))
+                __file__), "data/" + self.loginstoredname+".json"), "r"))
         except Exception as e:
             print(str(e))
             open(os.path.join(os.path.dirname(
-                __file__), self.loginstoredname+".json"), "w").write("[]")
+                __file__), "data/"+self.loginstoredname+".json"), "w").write("[]")
             self.loginbase = []
         self.policy = PasswordPolicy.from_names(length=5,
                                                 numbers=1,)
@@ -47,7 +47,7 @@ class loginBaseSetup:
     def adddata(self, jsons):
         self.loginbase.append(jsons)
         open(os.path.join(os.path.dirname(
-            __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+            __file__), "data/"+self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
 
     def checknotifications(self, uuid):
         for user in self.loginbase:
@@ -55,7 +55,7 @@ class loginBaseSetup:
                 if "notification" not in user:
                     user["notification"] = []
                     open(os.path.join(os.path.dirname(
-                        __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+                        __file__), "data/"+self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
                 if user["notification"] != []:
                     jsonnotification = user["notification"][0]
                     if user["notification"][0]["new"] == True:
@@ -78,11 +78,11 @@ class loginBaseSetup:
             if datetime.timestamp(datetime.now()) - login["timestamp"] >= 3600 and login["verified"] != 1:
                 self.loginbase.remove(login)
                 open(os.path.join(os.path.dirname(
-                    __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+                    __file__), "data/"+self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
             if login["verificationkey"] == verificationkey and login["verified"] != 1:
                 login["verified"] = 1
                 open(os.path.join(os.path.dirname(
-                    __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+                    __file__), "data/"+self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
                 return True
         return "this verification code is not on our servers."
 
@@ -129,7 +129,7 @@ class loginBaseSetup:
             if login["token"] == cookie:
                 login["token"] = randstr(30)
                 open(os.path.join(os.path.dirname(
-                    __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+                    __file__), "data/"+self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
                 return True
         return False
 
@@ -139,7 +139,7 @@ class loginBaseSetup:
                 if login["verified"] == 1:
                     login["token"] = randstr(30)
                     open(os.path.join(os.path.dirname(
-                        __file__), self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
+                        __file__), "data/"+self.loginstoredname+".json"), "w").write(json.dumps(self.loginbase))
                     return login
                 else:
                     return {"failed": "you need to verify your account by your email. your account will be deleted after 1 hour of the account being made unless the account is verified."}

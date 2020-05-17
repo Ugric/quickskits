@@ -141,7 +141,7 @@
             const response = await fetch("/updatemap?lat=" + position.coords.latitude + "&long=" + position.coords.longitude)
         }
         getLocation()
-        setInterval(getLocation(), 10000);
+        setInterval(getLocation, 10000);
     </script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script>
