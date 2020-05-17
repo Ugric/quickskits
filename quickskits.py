@@ -222,12 +222,7 @@ def login():
 
 @app.route("/map")
 def maps():
-    return render_template("quickmaps.html", user=request.args["user"].replace(" ", "-"))
-
-
-@app.route("/gps")
-def gps():
-    return render_template("maps.html")
+    return render_template("quickmaps.html", user=request.args["user"])
 
 
 @app.route("/updatemap")
@@ -239,7 +234,13 @@ def updatemap():
 
 @app.route("/quickmaps/get")
 def quickmapsget():
-    return jsonify(logindatabase.getuserinfofromusername(request.args["user"].replace("-", " "))["location"])
+    try:
+        return jsonify(logindatabase.getuserinfofromusername(request.args["user"].replace("-", " "))["location"])
+    except:
+        return jsonify({
+            "lat": "0",
+            "long": "0"
+        })
 
 
 @app.route("/logout")
