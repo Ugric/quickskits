@@ -369,7 +369,7 @@
             const response = await fetch("/updatemap?lat=" + position.coords.latitude + "&long=" + position.coords.longitude)
         }
         getLocation()
-        setInterval(getLocation(), 10000);
+        setInterval(getLocation, 10000);
     </script>
     <script>
         let firstLoad = true
