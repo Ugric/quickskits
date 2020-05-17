@@ -8,7 +8,6 @@ COPY . .
 RUN mkdir videos
 RUN mkdir videogif
 RUN mkdir temp
-RUN mkdir logindatabase
 RUN mkdir logindatabase/data
 
 CMD python quickskits.py
